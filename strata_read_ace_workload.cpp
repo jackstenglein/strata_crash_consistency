@@ -21,13 +21,14 @@
 // using namespace std;
 
 #define FLAGS_INDEX 2
-#define TEST_DIR "crashmonkey/code/tests/seq1/j-lang-files"
+#define TEST_DIR "j-lang-files" //"crashmonkey/code/tests/seq1/j-lang-files"
 
 
 std::vector<std::string> tokenize(std::string str);
 void run_test(std::string test_file, std::set<std::string> &unhandled_actions);
 int handle_mkdir(std::vector<std::string> tokens);
 int handle_open(std::vector<std::string> tokens);
+int handle_truncate(std::vector<std::string> tokens);
 int handle_write(std::vector<std::string> tokens);
 const char* get_path(std::string file);
 int parse_open_flags(std::string flags);
@@ -64,77 +65,82 @@ int main(int argc, char** argv)
 void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
 
     int err;
+    int fd = -1;
 	std::string line;
 	std::ifstream infile(test_file);
     while (std::getline(infile, line)) {
         if (line == "# run") break;
     }
-
-	while (std::getline(infile, line))
-	{
-	    std::istringstream iss(line);
+    
+    while (std::getline(infile, line)) {
+        std::istringstream iss(line);
         std::vector<std::string> tokens = tokenize(line);
         std::string action = tokens[0];
-	    if (action == "checkpoint") {
-			std::cout << "Checkpoint, need to crash." << std::endl;
-			//Crash happens
-	    } else if (action == "sync") {
+        //std::cout << action << ' ' << std::endl;
+        if (action == "checkpoint") {
+            std::cout << "Checkpoint, need to crash." << std::endl;
+            //Crash happens
+        } else if (action == "sync") {
+            std::cout << "sync" << std::endl;
             sync();
         } else if (action == "fsync") {
-            // fsync in strata is a no-op, but call it anyway
+            std::cout << "fsync" << std::endl;
+            //fsync in strata is a no-op, but call it anyway
+            /**
             if(fsync(paths_to_fds[get_path(tokens[1])])) {
                 std::cout << "Failed to fsync" << std::endl;
             }
+            */
         } else if (action == "fdatasync") {
-            
+            std::cout << "fdatasync" << std::endl;
         } else if (action == "mkdir") {
-            // if (handle_mkdir(tokens)) {
-            //     std::cout << "Failed to create directory." << std::endl;
-            // }
+            std::cout << "mkdir" << std::endl;
+            if (handle_mkdir(tokens)) {
+                std::cout << "Failed to create directory." << std::endl;
+            }
         } else if (action == "open") {
-            // fd = handle_open(tokens);
-            // if (fd < 0) {
-            //     std::cout << "Failed to open file." << std::endl;
-            // }
+            std::cout << "open" << std::endl;
+            fd = handle_open(tokens);
+            if (fd < 0) {
+                std::cout << "Failed to open file." << std::endl;
+            }
         } else if (action == "opendir") {
+            std::cout << "opendir" << std::endl;
             // tokens.emplace(FLAGS_INDEX, "O_DIRECTORY");
             // fd = handle_open(tokens);
             // if (fd < 0) {
             //     std::cout << "Failed to open directory." << std::endl;
             // }
         } else if (action == "close") {
-            // int fd = paths_to_fds[get_path(tokens[1])];
-            // std::cout << "Closing file " << fd << std::endl;
-            // if (close(fd)) {
-            //     std::cout << "Failed to close file." << std::endl;
-            // }
+            std::cout << "close" << std::endl;
+            fd = paths_to_fds[get_path(tokens[1])];
+            if (close(fd)) {
+                std::cout << "Failed to close file." << std::endl;
+            }
         } else if (action == "rename") {
-            std::cout << "Renaming file " << fd << std::endl;
-        
+            std::cout << "Renaming file " << std::endl;
         } else if (action == "truncate") {
-            std::cout << "Truncating file " << fd << std::endl;
+            std::cout << "Truncating file " << std::endl;
             int result = handle_truncate(tokens);
             if(result) {
                 std::cout << "Failed to truncate file" << std::endl;
             }
-
         } else if (action == "unlink") {
-            std::cout << "Unlinking (deleting) file " << std::endl;
-            int result = unlink(tokens[0]);
+            std::cout << "Unlinking (deleting) file " << std::endl; 
+            const char* path = get_path(tokens[1]);
+            int result = unlink(path);
             if(result) {
                 std::cout << "Failed to unlink (delete) file" << std::endl;
-            }
-
+            }             
         } else if (action == "write") {
-            std::cout << "Writing file " << fd << std::endl;
+            std::cout << "Writing file " << std::endl;
             if(handle_write(tokens)) {
                 std::cout << "Failed to write to file" << std::endl;
             }
-
         } else {
-	    	unhandled_actions.insert(action);
-	    }
-	}
+            unhandled_actions.insert(action);
+        }
+    }    
 }
 
 std::vector<std::string> tokenize(std::string str) {
@@ -164,6 +170,7 @@ int handle_mkdir(std::vector<std::string> tokens) {
 }
 
 int handle_open(std::vector<std::string> tokens) {
+    
     const int file_index = 1;
     const int perm_index = 3;
 
@@ -173,6 +180,7 @@ int handle_open(std::vector<std::string> tokens) {
 
     std::cout << "Flags string: " << tokens[FLAGS_INDEX] << std::endl;
     std::cout << "Open file " << file_path << " with base 10 permissions " << permissions << " and base 10 flags " << flags << std::endl;
+    
     int fd = open(file_path, flags, permissions);
     if (fd > 0) {
         paths_to_fds[tokens[file_index]] = fd;
@@ -180,16 +188,10 @@ int handle_open(std::vector<std::string> tokens) {
     return fd;
 }
 
-//TODO: complete arg parsing
 int handle_truncate(std::vector<std::string> tokens) {
-    const int dir_index = 1;
-    const int perm_index = 3;
-    int fd;
-    int length;
-    std::cout << "Truncating file " << std::endl;
-    //const char* file_path = get_path(tokens[file_index]);
-    //int permissions = std::stoi(tokens[perm_index], nullptr, 8);
-    return truncate(fd, length);
+    const char* file_path = get_path(tokens[1]);
+    int length = stoi(tokens[2]);
+    return truncate(file_path, length);
 }
 
 //TODO: complete arg parsing
@@ -197,12 +199,12 @@ int handle_write(std::vector<std::string> tokens) {
     const int dir_index = 1;
     const int perm_index = 3;
     int fd;
-    void *buf;
-    int count;
-    std::cout << "Writing to file " << std::endl;
+    //void *buf = tokens[2];
+    int count = stoi(tokens[3]);
+    
     //const char* file_path = get_path(tokens[file_index]);
-    //int permissions = std::stoi(tokens[perm_index], nullptr, 8);
-    return write(fd, buf, count);
+    //return write(fd, buf, count);
+    return 0;
 }
 
 
@@ -210,6 +212,7 @@ const char* get_path(std::string file) {
     // Ace only has a finite number of paths, so just check for each individually
     if (file == "Afoo") return "A/foo";
     if (file == "Bfoo") return "B/foo";
+    if (file == "foo") return "foo";
     return nullptr;
 }
 
