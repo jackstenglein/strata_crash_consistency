@@ -28,6 +28,7 @@ std::vector<std::string> tokenize(std::string str);
 void run_test(std::string test_file, std::set<std::string> &unhandled_actions);
 int handle_mkdir(std::vector<std::string> tokens);
 int handle_open(std::vector<std::string> tokens);
+int handle_write(std::vector<std::string> tokens);
 const char* get_path(std::string file);
 int parse_open_flags(std::string flags);
 
@@ -107,6 +108,29 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
             // if (close(fd)) {
             //     std::cout << "Failed to close file." << std::endl;
             // }
+        } else if (action == "rename") {
+            std::cout << "Renaming file " << fd << std::endl;
+        
+        } else if (action == "truncate") {
+            std::cout << "Truncating file " << fd << std::endl;
+            int result = handle_truncate(tokens);
+            if(result) {
+                std::cout << "Failed to truncate file" << std::endl;
+            }
+
+        } else if (action == "unlink") {
+            std::cout << "Unlinking (deleting) file " << std::endl;
+            int result = unlink(tokens[0]);
+            if(result) {
+                std::cout << "Failed to unlink (delete) file" << std::endl;
+            }
+
+        } else if (action == "write") {
+            std::cout << "Writing file " << fd << std::endl;
+            if(handle_write(tokens)) {
+                std::cout << "Failed to write to file" << std::endl;
+            }
+
         } else {
 	    	unhandled_actions.insert(action);
 	    }
@@ -155,6 +179,32 @@ int handle_open(std::vector<std::string> tokens) {
     }
     return fd;
 }
+
+//TODO: complete arg parsing
+int handle_truncate(std::vector<std::string> tokens) {
+    const int dir_index = 1;
+    const int perm_index = 3;
+    int fd;
+    int length;
+    std::cout << "Truncating file " << std::endl;
+    //const char* file_path = get_path(tokens[file_index]);
+    //int permissions = std::stoi(tokens[perm_index], nullptr, 8);
+    return truncate(fd, length);
+}
+
+//TODO: complete arg parsing
+int handle_write(std::vector<std::string> tokens) {
+    const int dir_index = 1;
+    const int perm_index = 3;
+    int fd;
+    void *buf;
+    int count;
+    std::cout << "Writing to file " << std::endl;
+    //const char* file_path = get_path(tokens[file_index]);
+    //int permissions = std::stoi(tokens[perm_index], nullptr, 8);
+    return write(fd, buf, count);
+}
+
 
 const char* get_path(std::string file) {
     // Ace only has a finite number of paths, so just check for each individually
