@@ -86,11 +86,9 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
         } else if (action == "fsync") {
             std::cout << "fsync" << std::endl;
             //fsync in strata is a no-op, but call it anyway
-            /**
             if(fsync(paths_to_fds[get_path(tokens[1])])) {
                 std::cout << "Failed to fsync" << std::endl;
             }
-            */
         } else if (action == "fdatasync") {
             std::cout << "fdatasync" << std::endl;
         } else if (action == "mkdir") {
@@ -104,15 +102,13 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
             if (fd < 0) {
                 std::cout << "Failed to open file." << std::endl;
             }
-            std::cout << "opened file fd" << fd << std::endl;
-
         } else if (action == "opendir") {
             std::cout << "opendir" << std::endl;
-            // tokens.emplace(FLAGS_INDEX, "O_DIRECTORY");
-            // fd = handle_open(tokens);
-            // if (fd < 0) {
-            //     std::cout << "Failed to open directory." << std::endl;
-            // }
+            auto it = tokens.emplace (tokens.begin() + 2, "O_DIRECTORY");
+            fd = handle_open(tokens);
+            if (fd < 0) {
+                std::cout << "Failed to open directory." << std::endl;
+            }
         } else if (action == "close") {
             std::cout << "close" << std::endl;
             fd = paths_to_fds[get_path(tokens[1])];
@@ -164,7 +160,6 @@ std::vector<std::string> tokenize(std::string str) {
 int handle_mkdir(std::vector<std::string> tokens) {
     const int dir_index = 1;
     const int perm_index = 2;
-
     const char* c_dir_name = tokens[dir_index].c_str();
     int permissions = std::stoi(tokens[perm_index], nullptr, 8);
     std::cout << "Create directory " << c_dir_name << " with base 10 permissions " << permissions << std::endl;
@@ -202,7 +197,7 @@ int handle_write(std::vector<std::string> tokens) {
     const int flags = 0 | O_RDWR;
     const int permissions = std::stoi("0777");
     int fd = open(file_path, flags, permissions);
-    std::cout << "handle_write fd " << fd << std::endl;
+    //std::cout << "handle_write fd " << fd << std::endl;
     int count = stoi(tokens[3]);
     std::string s(count, '0');
     return write(fd, s.c_str(), count);
@@ -213,7 +208,16 @@ const char* get_path(std::string file) {
     // Ace only has a finite number of paths, so just check for each individually
     if (file == "Afoo") return "A/foo";
     if (file == "Bfoo") return "B/foo";
+    if (file == "Abar") return "A/bar";
+    if (file == "Bbar") return "B/bar";
     if (file == "foo") return "foo";
+    if (file == "bar") return "bar";
+    if (file == "test") return "test";
+    if (file == "A") return "A";
+    if (file == "AC") return "A/C";
+    if (file == "B") return "B";
+    if (file == "ACfoo") return "A/C/foo";
+    if (file == "ACbar") return "A/C/bar";
     return nullptr;
 }
 
