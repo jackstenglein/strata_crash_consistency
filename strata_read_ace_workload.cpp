@@ -17,9 +17,11 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 // using namespace std;
 
+#define FILENAME_INDEX 1
 #define FLAGS_INDEX 2
 #define TEST_DIR "j-lang-files" //"crashmonkey/code/tests/seq1/j-lang-files"
 
@@ -32,6 +34,8 @@ int handle_truncate(std::vector<std::string> tokens);
 int handle_write(std::vector<std::string> tokens);
 const char* get_path(std::string file);
 int parse_open_flags(std::string flags);
+int handle_falloc(std::vector<std::string> tokens);
+int parse_falloc_flags(std::string flags);
 
 std::map<std::string, int> paths_to_fds;
 int main(int argc, char** argv)
@@ -52,7 +56,7 @@ int main(int argc, char** argv)
         }
         closedir(dir);
     } else {
-        perror("Could not open directory");
+        perror("Could not open directory test");
         return EXIT_FAILURE;
     }
 
@@ -65,7 +69,6 @@ int main(int argc, char** argv)
 void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
 
     int err;
-    int fd = -1;
 	std::string line;
 	std::ifstream infile(test_file);
     while (std::getline(infile, line)) {
@@ -91,27 +94,28 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
             }
         } else if (action == "fdatasync") {
             std::cout << "fdatasync" << std::endl;
+            if(fdatasync(paths_to_fds[get_path(tokens[1])])) {
+                std::cout << "Failed to fdatasync" << std::endl;
+            }
         } else if (action == "mkdir") {
-            std::cout << "mkdir" << std::endl;
             if (handle_mkdir(tokens)) {
                 std::cout << "Failed to create directory." << std::endl;
             }
         } else if (action == "open") {
-            std::cout << "open" << std::endl;
-            fd = handle_open(tokens);
+            int fd = handle_open(tokens);
             if (fd < 0) {
                 std::cout << "Failed to open file." << std::endl;
             }
         } else if (action == "opendir") {
             std::cout << "opendir" << std::endl;
             auto it = tokens.emplace (tokens.begin() + 2, "O_DIRECTORY");
-            fd = handle_open(tokens);
+            int fd = handle_open(tokens);
             if (fd < 0) {
                 std::cout << "Failed to open directory." << std::endl;
             }
         } else if (action == "close") {
             std::cout << "close" << std::endl;
-            fd = paths_to_fds[get_path(tokens[1])];
+            int fd = paths_to_fds[get_path(tokens[1])];
             if (close(fd)) {
                 std::cout << "Failed to close file." << std::endl;
             }
@@ -120,7 +124,7 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
         } else if (action == "truncate") {
             std::cout << "Truncating file " << std::endl;
             int result = handle_truncate(tokens);
-            if(result) {
+            if (result) {
                 std::cout << "Failed to truncate file" << std::endl;
             }
         } else if (action == "unlink") {
@@ -134,6 +138,13 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
             std::cout << "Writing file " << std::endl;
             if(!handle_write(tokens)) {
                 std::cout << "Failed to write to file" << std::endl;
+        } else if (action == "falloc") { 
+            if (handle_falloc(tokens)) {
+                std::cout << "Failed to fallocate" << std::endl;
+            }
+        } else if (action == "remove") {
+            if (remove(get_path(tokens[FILENAME_INDEX]))) {
+                std::cout << "Failed to remove " << tokens[FILENAME_INDEX] << std::endl;
             }
         } else {
             unhandled_actions.insert(action);
@@ -242,5 +253,35 @@ int parse_open_flags(std::string flags) {
         result |= O_DIRECTORY;
     }
 
+    return result;
+}
+
+int handle_falloc(std::vector<std::string> tokens) {
+    const int offset_index = 3;
+    const int length_index = 4;
+
+    const int fd = paths_to_fds[get_path(tokens[FILENAME_INDEX])];
+    const int flags = parse_falloc_flags(tokens[FLAGS_INDEX]);
+    const int offset = std::stoi(tokens[offset_index], nullptr, 10);
+    const int length = std::stoi(tokens[length_index], nullptr, 10);
+
+    return fallocate(fd, flags, offset, length);    
+}
+
+int parse_falloc_flags(std::string flags) {
+    if (flags == "0") {
+        return 0;
+    }
+
+    int result = 0;
+    if (flags.find("FALLOC_FL_ZERO_RANGE") != std::string::npos) {
+        result |= FALLOC_FL_ZERO_RANGE;
+    }
+    if (flags.find("FALLOC_FL_KEEP_SIZE") != std::string::npos) {
+        result |= FALLOC_FL_KEEP_SIZE;
+    }
+    if (flags.find("FALLOC_FL_PUNCH_HOLE") != std::string::npos) {
+        result |= FALLOC_FL_PUNCH_HOLE;
+    }
     return result;
 }
