@@ -28,14 +28,15 @@
 
 std::vector<std::string> tokenize(std::string str);
 void run_test(std::string test_file, std::set<std::string> &unhandled_actions);
-int handle_mkdir(std::vector<std::string> tokens);
-int handle_open(std::vector<std::string> tokens);
+int handle_mkdir(std::vector<std::string> tokens, std::set<std::string> paths_added);
+int handle_open(std::vector<std::string> tokens, std::set<std::string> paths_added);
 int handle_truncate(std::vector<std::string> tokens);
 int handle_write(std::vector<std::string> tokens);
 const char* get_path(std::string file);
 int parse_open_flags(std::string flags);
 int handle_falloc(std::vector<std::string> tokens);
 int parse_falloc_flags(std::string flags);
+void reset(std::set<std::string> paths_added);
 
 std::map<std::string, int> paths_to_fds;
 int main(int argc, char** argv)
@@ -71,6 +72,7 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
     int err;
 	std::string line;
 	std::ifstream infile(test_file);
+    std::set<std::string> paths_added;
     while (std::getline(infile, line)) {
         if (line == "# run") break;
     }
@@ -98,18 +100,18 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
                 std::cout << "Failed to fdatasync" << std::endl;
             }
         } else if (action == "mkdir") {
-            if (handle_mkdir(tokens)) {
+            if (handle_mkdir(tokens, paths_added)) {
                 std::cout << "Failed to create directory." << std::endl;
             }
         } else if (action == "open") {
-            int fd = handle_open(tokens);
+            int fd = handle_open(tokens, paths_added);
             if (fd < 0) {
                 std::cout << "Failed to open file." << std::endl;
             }
         } else if (action == "opendir") {
             std::cout << "opendir" << std::endl;
             auto it = tokens.emplace (tokens.begin() + 2, "O_DIRECTORY");
-            int fd = handle_open(tokens);
+            int fd = handle_open(tokens, paths_added);
             if (fd < 0) {
                 std::cout << "Failed to open directory." << std::endl;
             }
@@ -138,6 +140,7 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
             std::cout << "Writing file " << std::endl;
             if(!handle_write(tokens)) {
                 std::cout << "Failed to write to file" << std::endl;
+            }
         } else if (action == "falloc") { 
             if (handle_falloc(tokens)) {
                 std::cout << "Failed to fallocate" << std::endl;
@@ -146,10 +149,12 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
             if (remove(get_path(tokens[FILENAME_INDEX]))) {
                 std::cout << "Failed to remove " << tokens[FILENAME_INDEX] << std::endl;
             }
+            paths_added.erase(tokens[FILENAME_INDEX]);
         } else {
             unhandled_actions.insert(action);
         }
     }    
+    reset(paths_added);
 }
 
 std::vector<std::string> tokenize(std::string str) {
@@ -168,16 +173,17 @@ std::vector<std::string> tokenize(std::string str) {
     return result;
 }
 
-int handle_mkdir(std::vector<std::string> tokens) {
+int handle_mkdir(std::vector<std::string> tokens, std::set<std::string> paths_added) {
     const int dir_index = 1;
     const int perm_index = 2;
     const char* c_dir_name = tokens[dir_index].c_str();
     int permissions = std::stoi(tokens[perm_index], nullptr, 8);
     std::cout << "Create directory " << c_dir_name << " with base 10 permissions " << permissions << std::endl;
+    paths_added.insert(c_dir_name);
     return mkdir(c_dir_name, (mode_t)permissions);
 }
 
-int handle_open(std::vector<std::string> tokens) {
+int handle_open(std::vector<std::string> tokens, std::set<std::string> paths_added) {
     
     const int file_index = 1;
     const int perm_index = 3;
@@ -192,6 +198,7 @@ int handle_open(std::vector<std::string> tokens) {
     int fd = open(file_path, flags, permissions);
     if (fd > 0) {
         paths_to_fds[tokens[file_index]] = fd;
+        paths_added.insert(file_path);
     }
     return fd;
 }
@@ -205,10 +212,7 @@ int handle_truncate(std::vector<std::string> tokens) {
 int handle_write(std::vector<std::string> tokens) {
     const int perm_index = 3;
     const char* file_path = get_path(tokens[1]);
-    const int flags = 0 | O_RDWR;
-    const int permissions = std::stoi("0777");
-    int fd = open(file_path, flags, permissions);
-    //std::cout << "handle_write fd " << fd << std::endl;
+    int fd = paths_to_fds[tokens[1]];
     int count = stoi(tokens[3]);
     std::string s(count, '0');
     return write(fd, s.c_str(), count);
@@ -284,4 +288,8 @@ int parse_falloc_flags(std::string flags) {
         result |= FALLOC_FL_PUNCH_HOLE;
     }
     return result;
+}
+
+void reset(std::set<std::string> paths_added) {
+
 }
