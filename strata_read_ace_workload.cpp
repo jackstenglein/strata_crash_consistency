@@ -206,6 +206,8 @@ int handle_write(std::vector<std::string> tokens) {
 
 const char* get_path(std::string file) {
     // Ace only has a finite number of paths, so just check for each individually
+    if (file == "ACfoo") return "A/C/foo";
+    if (file == "ACbar") return "A/C/bar";
     if (file == "Afoo") return "A/foo";
     if (file == "Bfoo") return "B/foo";
     if (file == "Abar") return "A/bar";
@@ -216,8 +218,6 @@ const char* get_path(std::string file) {
     if (file == "A") return "A";
     if (file == "AC") return "A/C";
     if (file == "B") return "B";
-    if (file == "ACfoo") return "A/C/foo";
-    if (file == "ACbar") return "A/C/bar";
     return nullptr;
 }
 
