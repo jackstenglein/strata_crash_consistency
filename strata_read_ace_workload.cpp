@@ -104,6 +104,8 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
             if (fd < 0) {
                 std::cout << "Failed to open file." << std::endl;
             }
+            std::cout << "opened file fd" << fd << std::endl;
+
         } else if (action == "opendir") {
             std::cout << "opendir" << std::endl;
             // tokens.emplace(FLAGS_INDEX, "O_DIRECTORY");
@@ -134,7 +136,7 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
             }             
         } else if (action == "write") {
             std::cout << "Writing file " << std::endl;
-            if(handle_write(tokens)) {
+            if(!handle_write(tokens)) {
                 std::cout << "Failed to write to file" << std::endl;
             }
         } else {
@@ -194,17 +196,16 @@ int handle_truncate(std::vector<std::string> tokens) {
     return truncate(file_path, length);
 }
 
-//TODO: complete arg parsing
 int handle_write(std::vector<std::string> tokens) {
-    const int dir_index = 1;
     const int perm_index = 3;
-    int fd;
-    //void *buf = tokens[2];
+    const char* file_path = get_path(tokens[1]);
+    const int flags = 0 | O_RDWR;
+    const int permissions = std::stoi("0777");
+    int fd = open(file_path, flags, permissions);
+    std::cout << "handle_write fd " << fd << std::endl;
     int count = stoi(tokens[3]);
-    
-    //const char* file_path = get_path(tokens[file_index]);
-    //return write(fd, buf, count);
-    return 0;
+    std::string s(count, '0');
+    return write(fd, s.c_str(), count);
 }
 
 
