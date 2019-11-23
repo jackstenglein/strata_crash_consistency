@@ -29,15 +29,15 @@
 
 std::vector<std::string> tokenize(std::string str);
 void run_test(std::string test_file, std::set<std::string> &unhandled_actions);
-int handle_mkdir(std::vector<std::string> tokens, std::set<std::string> paths_added);
-int handle_open(std::vector<std::string> tokens, std::set<std::string> paths_added);
+int handle_mkdir(std::vector<std::string> tokens, std::set<std::string> &paths_added);
+int handle_open(std::vector<std::string> tokens, std::set<std::string> &paths_added);
 int handle_truncate(std::vector<std::string> tokens);
 int handle_write(std::vector<std::string> tokens);
 const char* get_path(std::string file);
 int parse_open_flags(std::string flags);
 int handle_falloc(std::vector<std::string> tokens);
 int parse_falloc_flags(std::string flags);
-void reset(std::set<std::string> paths_added);
+void reset(std::set<std::string> &paths_added);
 
 std::map<std::string, int> paths_to_fds;
 int main(int argc, char** argv)
@@ -112,7 +112,7 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
         } else if (action == "opendir") {
             std::cout << "opendir" << std::endl;
             tokens.insert(tokens.begin() + 2, "O_DIRECTORY");
-            int fd = handle_open(tokens);
+            int fd = handle_open(tokens, paths_added);
             if (fd < 0) {
                 std::cout << "Failed to open directory." << std::endl;
             }
@@ -127,6 +127,8 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
             if (rename(get_path(tokens[1]), get_path(tokens[2]))) {
                 std::cout << "Failed to rename " << tokens[1] << " to " << tokens[2] << std::endl;
             }
+            paths_added.erase(get_path(tokens[1]));
+            paths_added.insert(get_path(tokens[2]));
         } else if (action == "truncate") {
             std::cout << "Truncating file " << std::endl;
             int result = handle_truncate(tokens);
@@ -177,7 +179,7 @@ std::vector<std::string> tokenize(std::string str) {
     return result;
 }
 
-int handle_mkdir(std::vector<std::string> tokens, std::set<std::string> paths_added) {
+int handle_mkdir(std::vector<std::string> tokens, std::set<std::string> &paths_added) {
     const int dir_index = 1;
     const int perm_index = 2;
     const char* c_dir_name = tokens[dir_index].c_str();
@@ -187,7 +189,7 @@ int handle_mkdir(std::vector<std::string> tokens, std::set<std::string> paths_ad
     return mkdir(c_dir_name, (mode_t)permissions);
 }
 
-int handle_open(std::vector<std::string> tokens, std::set<std::string> paths_added) {
+int handle_open(std::vector<std::string> tokens, std::set<std::string> &paths_added) {
     
     const int file_index = 1;
     const int perm_index = 3;
@@ -294,6 +296,14 @@ int parse_falloc_flags(std::string flags) {
     return result;
 }
 
-void reset(std::set<std::string> paths_added) {
-
+void reset(std::set<std::string> &paths_added) {
+    std::cout << "RESET CALLED" << std::endl;
+    std::cout << paths_added.size() << std::endl;
+    for(std::set<std::string>::iterator it = paths_added.begin(); it != paths_added.end(); ++it) {
+        std::string curr_path = *it;
+        if(remove(get_path(curr_path))) {
+            std::cout << "failed to remove " << curr_path << std::endl;
+        }
+    }
+    paths_added.clear();
 }
