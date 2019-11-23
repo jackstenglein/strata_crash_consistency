@@ -18,12 +18,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdio.h>
 
 // using namespace std;
 
 #define FILENAME_INDEX 1
 #define FLAGS_INDEX 2
-#define TEST_DIR "j-lang-files" //"crashmonkey/code/tests/seq1/j-lang-files"
+#define TEST_DIR "j-lang-files"
 
 
 std::vector<std::string> tokenize(std::string str);
@@ -110,8 +111,8 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
             }
         } else if (action == "opendir") {
             std::cout << "opendir" << std::endl;
-            auto it = tokens.emplace (tokens.begin() + 2, "O_DIRECTORY");
-            int fd = handle_open(tokens, paths_added);
+            tokens.insert(tokens.begin() + 2, "O_DIRECTORY");
+            int fd = handle_open(tokens);
             if (fd < 0) {
                 std::cout << "Failed to open directory." << std::endl;
             }
@@ -123,6 +124,9 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
             }
         } else if (action == "rename") {
             std::cout << "Renaming file " << std::endl;
+            if (rename(get_path(tokens[1]), get_path(tokens[2]))) {
+                std::cout << "Failed to rename " << tokens[1] << " to " << tokens[2] << std::endl;
+            }
         } else if (action == "truncate") {
             std::cout << "Truncating file " << std::endl;
             int result = handle_truncate(tokens);
