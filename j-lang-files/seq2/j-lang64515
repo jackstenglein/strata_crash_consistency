@@ -1,0 +1,37 @@
+# define
+test
+A
+A/C
+B
+foo
+bar
+A/foo
+A/bar
+B/foo
+B/bar
+A/C/foo
+A/C/bar
+
+# declare
+local_checkpoint
+
+# setup
+
+
+# run
+open foo O_RDWR|O_CREAT 0777
+write foo 0 32768
+falloc foo FALLOC_FL_KEEP_SIZE 0 5000
+mkdir B 0777
+opendir B 0777
+fsync B
+checkpoint 0
+mkdir A 0777
+opendir A 0777
+close A
+rename A B
+opendir B 0777
+fsync B
+checkpoint 1
+close foo
+close B
