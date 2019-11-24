@@ -332,20 +332,20 @@ void reset() {
     //std::cout << paths_added.size() << std::endl;
 #ifdef MLFS
     //remove files first
-    remove("mlfs/A/C/foo");
-    remove("mlfs/A/C/bar");
-    remove("mlfs/A/foo");
-    remove("mlfs/B/foo");
-    remove("mlfs/A/bar");
-    remove("mlfs/B/bar");
-    remove("mlfs/foo");
-    remove("mlfs/bar");
-    remove("mlfs/B/bar");
+    remove("/mlfs/A/C/foo");
+    remove("/mlfs/A/C/bar");
+    remove("/mlfs/A/foo");
+    remove("/mlfs/B/foo");
+    remove("/mlfs/A/bar");
+    remove("/mlfs/B/bar");
+    remove("/mlfs/foo");
+    remove("/mlfs/bar");
+    remove("/mlfs/B/bar");
     
     //remove directories
-    remove("mlfs/A");
-    remove("mlfs/A/C");
-    remove("mlfs/B");
+    remove("/mlfs/A");
+    remove("/mlfs/A/C");
+    remove("/mlfs/B");
 #else
     //remove files first
     remove("test/A/C/foo");
