@@ -310,7 +310,7 @@ int parse_falloc_flags(std::string flags) {
 void reset(std::set<std::string> &paths_added) {
     std::cout << "RESET CALLED" << std::endl;
     std::cout << paths_added.size() << std::endl;
-    /**
+    
     //remove files first
     remove("test/A/C/foo");
     remove("test/A/C/bar");
@@ -326,6 +326,6 @@ void reset(std::set<std::string> &paths_added) {
     remove("test/A");
     remove("test/A/C");
     remove("test/B");
-    */
+    
     paths_added.clear();
 }
