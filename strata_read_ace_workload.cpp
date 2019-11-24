@@ -250,7 +250,7 @@ int handle_write(std::vector<std::string> tokens) {
     const char* file_path = get_path(tokens[1]);
     int fd = paths_to_fds[tokens[1]];
     int count = stoi(tokens[3]);
-    //std::string s(count, '0');
+    std::string s(count, '0');
     return write(fd, s.c_str(), count);
 }
 
