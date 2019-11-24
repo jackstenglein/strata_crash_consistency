@@ -13,7 +13,7 @@ DAX_OBJ = .$(LIBFS_DIR)/storage/storage_dax.o
 DPDK_VER = 16.07.2
 DPDK_DIR = $(abspath $(LIBFS_DIR)/../lib/dpdk-$(DPDK_VER)/x86_64-native-linuxapp-gcc)
 
-CFLAGS = -I $(DPDK_DIR)/include -I$(INCLUDES)
+CFLAGS = -I$(DPDK_DIR)/include -I$(INCLUDES)
 
 LDFLAGS = -Wl,-rpath=$(abspath $(LIBFS_DIR)) \
 		  -Wl,-rpath=$(abspath $(NVML_DIR)) \
@@ -22,7 +22,7 @@ LDFLAGS = -Wl,-rpath=$(abspath $(LIBFS_DIR)) \
 all: $(EXE)
 
 strata_read_ace_workload: strata_read_ace_workload.cpp
-	$(CC) -o $@ $^ $(CFLAGS) -I$(INCLUDES) -L$(LIBFS_DIR) -lmlfs -lm -lrt -lpthread $(LDFLAGS) -fopenmp 
+	$(CXX) -std=c++11 -g -Ofast -o $@ $^ -I$(INCLUDES) -L$(LIBFS_DIR) -lmlfs -DMLFS $(CFLAGS) $(LDFLAGS)
 
 clean:
 	rm -rf *.o $(EXE) *.normal
