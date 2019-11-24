@@ -13,6 +13,10 @@
 #include <dirent.h>
 #include <set>
 
+#ifdef MLFS
+#include <mlfs/mlfs_interface.h>	
+#endif
+
 // C filesys operations
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -51,6 +55,11 @@ std::map<std::string, int> paths_to_fds;
 
 int main(int argc, char** argv)
 {    
+
+#ifdef MLFS
+	init_fs();
+#endif
+
     std::set<std::string> unhandled_actions;
 
     std::string workload_dir = std::string(WORKLOAD_DIR);
@@ -71,6 +80,10 @@ int main(int argc, char** argv)
         perror("Could not open directory test");
         return EXIT_FAILURE;
     }
+
+#ifdef MLFS
+	shutdown_fs();
+#endif
 
     std::cout << "Unhandled Actions: ";
     for (std::set<std::string>::iterator it=unhandled_actions.begin(); it!=unhandled_actions.end(); ++it)
