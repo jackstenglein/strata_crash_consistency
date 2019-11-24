@@ -24,7 +24,7 @@
 
 #define FILENAME_INDEX 1
 #define FLAGS_INDEX 2
-#define TEST_DIR "j-lang-files"
+#define WORKLOAD_DIR "j-lang-files"
 
 
 std::vector<std::string> tokenize(std::string str);
@@ -40,24 +40,31 @@ int parse_falloc_flags(std::string flags);
 void reset(std::set<std::string> &paths_added);
 int test_fd;
 
+#ifdef MLFS
+const char test_dir_prefix[] = "/mlfs";
+#else
+const char test_dir_prefix[] = "./test";
+#endif
+
 std::map<std::string, int> paths_to_fds;
 std::set<std::string> paths_added;
 
 int main(int argc, char** argv)
-{    std::set<std::string> unhandled_actions;
+{    
+    std::set<std::string> unhandled_actions;
 
-    std::string test_dir = std::string(TEST_DIR);
+    std::string workload_dir = std::string(WORKLOAD_DIR);
     std::string separator = "/";
     DIR *dir;
     struct dirent *ent;
     //create test directory
-    if ((dir = opendir(TEST_DIR)) != NULL) {
+    if ((dir = opendir(WORKLOAD_DIR)) != NULL) {
         /* print all the files and directories within directory */
         while ((ent = readdir(dir)) != NULL) {
             std::string file = std::string(ent->d_name);
             if (file != "." && file != "..") {
-                std::cout << test_dir + separator + file << std::endl;
-                run_test(test_dir + separator + file, unhandled_actions);
+                std::cout << workload_dir + separator + file << std::endl;
+                run_test(workload_dir + separator + file, unhandled_actions);
             }
         }
         closedir(dir);
@@ -238,18 +245,19 @@ int handle_write(std::vector<std::string> tokens) {
 
 const char* get_path(std::string file) {
     // Ace only has a finite number of paths, so just check for each individually
-    if (file == "ACfoo") return "test/A/C/foo";
-    if (file == "ACbar") return "test/A/C/bar";
-    if (file == "Afoo") return "test/A/foo";
-    if (file == "Bfoo") return "test/B/foo";
-    if (file == "Abar") return "test/A/bar";
-    if (file == "Bbar") return "test/B/bar";
-    if (file == "foo") return "test/foo";
-    if (file == "bar") return "test/bar";
-    if (file == "test") return "test";
-    if (file == "A") return "test/A";
-    if (file == "AC") return "test/A/C";
-    if (file == "B") return "test/B";
+    std::string path = std::string(test_dir_prefix);
+    if (file == "ACfoo") return (path + "/A/C/foo").c_str();
+    if (file == "ACbar") return (path + "/A/C/bar").c_str();
+    if (file == "Afoo") return (path + "/A/foo").c_str();
+    if (file == "Bfoo") return (path + "/B/foo").c_str();
+    if (file == "Abar") return (path + "/A/bar").c_str();
+    if (file == "Bbar") return (path + "/B/bar").c_str();
+    if (file == "foo") return (path + "/foo").c_str();
+    if (file == "bar") return (path + "/bar").c_str();
+    if (file == "A") return (path + "/A").c_str();
+    if (file == "AC") return (path + "/A/C").c_str();
+    if (file == "B") return (path + "/B").c_str();
+    if (file == "test") return test_dir_prefix;
     return nullptr;
 }
 
