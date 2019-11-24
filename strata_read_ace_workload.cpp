@@ -37,7 +37,7 @@ int handle_mkdir(std::vector<std::string> tokens);
 int handle_open(std::vector<std::string> tokens);
 int handle_truncate(std::vector<std::string> tokens);
 int handle_write(std::vector<std::string> tokens);
-const char* get_path(std::string file);
+std::string get_path(std::string file);
 int parse_open_flags(std::string flags);
 int handle_falloc(std::vector<std::string> tokens);
 int parse_falloc_flags(std::string flags);
@@ -150,7 +150,7 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
             }
         } else if (action == "rename") {
             std::cout << "Renaming file " << std::endl;
-            if (rename(get_path(tokens[1]), get_path(tokens[2]))) {
+            if (rename(get_path(tokens[1]).c_str(), get_path(tokens[2]).c_str() )) {
                 std::cout << "Failed to rename " << tokens[1] << " to " << tokens[2] << std::endl;
             }
             //paths_added.erase(get_path(tokens[1]));
@@ -163,8 +163,8 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
             }
         } else if (action == "unlink") {
             std::cout << "Unlinking (deleting) file " << std::endl; 
-            const char* path = get_path(tokens[1]);
-            int result = unlink(path);
+            std::string path = get_path(tokens[1]);
+            int result = unlink(path.c_str());
             if(result) {
                 std::cout << "Failed to unlink (delete) file" << std::endl;
             }             
@@ -178,7 +178,7 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
                 std::cout << "Failed to fallocate" << std::endl;
             }
         } else if (action == "remove") {
-            if (remove(get_path(tokens[FILENAME_INDEX]))) {
+            if (remove(get_path(tokens[FILENAME_INDEX]).c_str())) {
                 std::cout << "Failed to remove " << tokens[FILENAME_INDEX] << std::endl;
             }
             //paths_added.erase(tokens[FILENAME_INDEX]);
@@ -208,11 +208,11 @@ std::vector<std::string> tokenize(std::string str) {
 int handle_mkdir(std::vector<std::string> tokens) {
     const int dir_index = 1;
     const int perm_index = 2;
-    const char* c_dir_name = get_path(tokens[dir_index]);
+    std::string c_dir_name = get_path(tokens[dir_index]);
     int permissions = std::stoi(tokens[perm_index], nullptr, 8);
     std::cout << "Create directory " << c_dir_name << " with base 10 permissions " << permissions << std::endl;
     //paths_added.insert(c_dir_name);
-    return mkdir(c_dir_name, (mode_t)permissions);
+    return mkdir(c_dir_name.c_str(), (mode_t)permissions);
 }
 
 int handle_open(std::vector<std::string> tokens) {
@@ -220,17 +220,17 @@ int handle_open(std::vector<std::string> tokens) {
     const int file_index = 1;
     const int perm_index = 3;
 
-    const char* file_path = get_path(tokens[file_index]);
+    std::string file_path = get_path(tokens[file_index]);
     const int flags = parse_open_flags(tokens[FLAGS_INDEX]);
     const int permissions = std::stoi(tokens[perm_index], nullptr, 8);
 
     std::cout << "Flags string: " << tokens[FLAGS_INDEX] << std::endl;
     std::cout << "Open file " << file_path << " with base 10 permissions " << permissions << " and base 10 flags " << flags << std::endl;
     
-    int fd = open(file_path, flags, permissions);
+    int fd = open(file_path.c_str(), flags, permissions);
 
     if (fd > 0) {
-        paths_to_fds["test/" + tokens[file_index]] = fd;
+        paths_to_fds[file_path] = fd;
         if(tokens[1] == "test") {
             test_fd = fd;
         }
@@ -240,36 +240,36 @@ int handle_open(std::vector<std::string> tokens) {
 }
 
 int handle_truncate(std::vector<std::string> tokens) {
-    const char* file_path = get_path(tokens[1]);
+    std::string file_path = get_path(tokens[1]);
     int length = stoi(tokens[2]);
-    return truncate(file_path, length);
+    return truncate(file_path.c_str(), length);
 }
 
 int handle_write(std::vector<std::string> tokens) {
     const int perm_index = 3;
-    const char* file_path = get_path(tokens[1]);
-    int fd = paths_to_fds[tokens[1]];
+    std::string file_path = get_path(tokens[1]);
+    int fd = paths_to_fds[file_path];
     int count = stoi(tokens[3]);
     std::string s(count, '0');
     return write(fd, s.c_str(), count);
 }
 
 
-const char* get_path(std::string file) {
+std::string get_path(std::string file) {
     // Ace only has a finite number of paths, so just check for each individually
-    std::string path = std::string(test_dir_prefix);
-    if (file == "ACfoo") return (path + "/A/C/foo").c_str();
-    if (file == "ACbar") return (path + "/A/C/bar").c_str();
-    if (file == "Afoo") return (path + "/A/foo").c_str();
-    if (file == "Bfoo") return (path + "/B/foo").c_str();
-    if (file == "Abar") return (path + "/A/bar").c_str();
-    if (file == "Bbar") return (path + "/B/bar").c_str();
-    if (file == "foo") return (path + "/foo").c_str();
-    if (file == "bar") return (path + "/bar").c_str();
-    if (file == "A") return (path + "/A").c_str();
-    if (file == "AC") return (path + "/A/C").c_str();
-    if (file == "B") return (path + "/B").c_str();
-    if (file == "test") return test_dir_prefix;
+    std::string path(test_dir_prefix);
+    if (file == "ACfoo") return path + "/A/C/foo";
+    if (file == "ACbar") return path + "/A/C/bar";
+    if (file == "Afoo") return (path + "/A/foo");
+    if (file == "Bfoo") return (path + "/B/foo");
+    if (file == "Abar") return (path + "/A/bar");
+    if (file == "Bbar") return (path + "/B/bar");
+    if (file == "foo") return (path + "/foo");
+    if (file == "bar") return (path + "/bar");
+    if (file == "A") return (path + "/A");
+    if (file == "AC") return (path + "/A/C");
+    if (file == "B") return (path + "/B");
+    if (file == "test") return path;
     return nullptr;
 }
 
