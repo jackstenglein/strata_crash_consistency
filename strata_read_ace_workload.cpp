@@ -38,8 +38,11 @@ int parse_open_flags(std::string flags);
 int handle_falloc(std::vector<std::string> tokens);
 int parse_falloc_flags(std::string flags);
 void reset(std::set<std::string> &paths_added);
+int test_fd;
 
 std::map<std::string, int> paths_to_fds;
+std::set<std::string> paths_added;
+
 int main(int argc, char** argv)
 {    std::set<std::string> unhandled_actions;
 
@@ -47,6 +50,7 @@ int main(int argc, char** argv)
     std::string separator = "/";
     DIR *dir;
     struct dirent *ent;
+    //create test directory
     if ((dir = opendir(TEST_DIR)) != NULL) {
         /* print all the files and directories within directory */
         while ((ent = readdir(dir)) != NULL) {
@@ -73,11 +77,9 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
     int err;
 	std::string line;
 	std::ifstream infile(test_file);
-    std::set<std::string> paths_added;
     while (std::getline(infile, line)) {
         if (line == "# run") break;
     }
-    
     while (std::getline(infile, line)) {
         std::istringstream iss(line);
         std::vector<std::string> tokens = tokenize(line);
@@ -90,10 +92,15 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
             std::cout << "sync" << std::endl;
             sync();
         } else if (action == "fsync") {
-            std::cout << "fsync" << std::endl;
             //fsync in strata is a no-op, but call it anyway
-            if(fsync(paths_to_fds[get_path(tokens[1])])) {
-                std::cout << "Failed to fsync" << std::endl;
+            std::cout << "fsync" << std::endl;
+            if(tokens[1] == "test") {
+                fsync(test_fd);
+            }
+            else {
+                if(fsync(paths_to_fds[get_path(tokens[1])])) {
+                    std::cout << "Failed to fsync" << std::endl;
+                }
             }
         } else if (action == "fdatasync") {
             std::cout << "fdatasync" << std::endl;
@@ -118,7 +125,7 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
             }
         } else if (action == "close") {
             std::cout << "close" << std::endl;
-            int fd = paths_to_fds[get_path(tokens[1])];
+            int fd = paths_to_fds[get_path(tokens[1])];            
             if (close(fd)) {
                 std::cout << "Failed to close file." << std::endl;
             }
@@ -202,8 +209,12 @@ int handle_open(std::vector<std::string> tokens, std::set<std::string> &paths_ad
     std::cout << "Open file " << file_path << " with base 10 permissions " << permissions << " and base 10 flags " << flags << std::endl;
     
     int fd = open(file_path, flags, permissions);
+
     if (fd > 0) {
-        paths_to_fds[tokens[file_index]] = fd;
+        paths_to_fds["test/" + tokens[file_index]] = fd;
+        if(tokens[1] == "test") {
+            test_fd = fd;
+        }
         paths_added.insert(file_path);
     }
     return fd;
@@ -227,18 +238,18 @@ int handle_write(std::vector<std::string> tokens) {
 
 const char* get_path(std::string file) {
     // Ace only has a finite number of paths, so just check for each individually
-    if (file == "ACfoo") return "A/C/foo";
-    if (file == "ACbar") return "A/C/bar";
-    if (file == "Afoo") return "A/foo";
-    if (file == "Bfoo") return "B/foo";
-    if (file == "Abar") return "A/bar";
-    if (file == "Bbar") return "B/bar";
-    if (file == "foo") return "foo";
-    if (file == "bar") return "bar";
+    if (file == "ACfoo") return "test/A/C/foo";
+    if (file == "ACbar") return "test/A/C/bar";
+    if (file == "Afoo") return "test/A/foo";
+    if (file == "Bfoo") return "test/B/foo";
+    if (file == "Abar") return "test/A/bar";
+    if (file == "Bbar") return "test/B/bar";
+    if (file == "foo") return "test/foo";
+    if (file == "bar") return "test/bar";
     if (file == "test") return "test";
-    if (file == "A") return "A";
-    if (file == "AC") return "A/C";
-    if (file == "B") return "B";
+    if (file == "A") return "test/A";
+    if (file == "AC") return "test/A/C";
+    if (file == "B") return "test/B";
     return nullptr;
 }
 
@@ -299,11 +310,22 @@ int parse_falloc_flags(std::string flags) {
 void reset(std::set<std::string> &paths_added) {
     std::cout << "RESET CALLED" << std::endl;
     std::cout << paths_added.size() << std::endl;
-    for(std::set<std::string>::iterator it = paths_added.begin(); it != paths_added.end(); ++it) {
-        std::string curr_path = *it;
-        if(remove(get_path(curr_path))) {
-            std::cout << "failed to remove " << curr_path << std::endl;
-        }
-    }
+    /**
+    //remove files first
+    remove("test/A/C/foo");
+    remove("test/A/C/bar");
+    remove("test/A/foo");
+    remove("test/B/foo");
+    remove("test/A/bar");
+    remove("test/B/bar");
+    remove("test/foo");
+    remove("test/bar");
+    remove("test/B/bar");
+    
+    //remove directories
+    remove("test/A");
+    remove("test/A/C");
+    remove("test/B");
+    */
     paths_added.clear();
 }
