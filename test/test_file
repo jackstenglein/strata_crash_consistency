@@ -1,7 +1,7 @@
 # run
 mkdir B 0777
 open Bfoo O_RDWR|O_CREAT 0777
-remove Bfoo
+write Bfoo 0 4096
 fsync Bfoo
 checkpoint 1
 close Bfoo
