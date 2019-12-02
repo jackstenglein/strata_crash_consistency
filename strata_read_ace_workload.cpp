@@ -110,111 +110,84 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
         if (action == "checkpoint") {
 #ifdef CRASH
             std::cout << "Checkpoint, need to crash." << std::endl;
-            //Crash happens
-	    crash = 1;
+            //Crash happens - kill strata
 #else
 	    std::cout << "Checkpoint, non crashing run" << std::endl;
 #endif	    
         } else if (action == "sync") {
-	  if(!crash) {
-	        std::cout << "sync" << std::endl;
-                sync();
-	  }
+	    std::cout << "sync" << std::endl;
+            sync();
         } else if (action == "fsync") {
           //fsync in strata is a no-op, but call it anyway
-	  if(!crash) {
-            std::cout << "fsync" << std::endl;
+	    std::cout << "fsync" << std::endl;
             if(tokens[1] == "test") {
               fsync(test_fd);
             }
             else {
               if(fsync(paths_to_fds[get_path(tokens[1])])) {
                  std::cout << "Failed to fsync" << std::endl;
-              }
             }
-	  }
-        } else if (action == "fdatasync") {
-	  if(!crash) {
+          }
+        } else if (action == "fdatasync") {	  
             std::cout << "fdatasync" << std::endl;
             if(fdatasync(paths_to_fds[get_path(tokens[1])])) {
-                std::cout << "Failed to fdatasync" << std::endl;
+              std::cout << "Failed to fdatasync" << std::endl;
             }
-	  }
         } else if (action == "mkdir") {
-	  if(!crash) {
-            if (handle_mkdir(tokens)) {
-                std::cout << "Failed to create directory." << std::endl;
+	    if (handle_mkdir(tokens)) {
+              std::cout << "Failed to create directory." << std::endl;
             }
-	  }
-        } else if (action == "open") {
-	  if(!crash) {
-            int fd = handle_open(tokens);
+	} else if (action == "open") {
+	    int fd = handle_open(tokens);
             if (fd < 0) {
-                std::cout << "Failed to open file." << std::endl;
+              std::cout << "Failed to open file." << std::endl;
             }
-	  }
-        } else if (action == "opendir") {
-	  if(!crash) {
+	} else if (action == "opendir") {
             std::cout << "opendir" << std::endl;
             tokens.insert(tokens.begin() + 2, "O_DIRECTORY");
             int fd = handle_open(tokens);
             if (fd < 0) {
-                std::cout << "Failed to open directory." << std::endl;
+              std::cout << "Failed to open directory." << std::endl;
             }
-	  }
-        } else if (action == "close") {
-	  if(!crash) {
+        } else if (action == "close") { 
             std::cout << "close" << std::endl;
             int fd = paths_to_fds[get_path(tokens[1])];            
             if (close(fd)) {
-                std::cout << "Failed to close file." << std::endl;
+              std::cout << "Failed to close file." << std::endl;
             }
-	  }
         } else if (action == "rename") {
-	  if(!crash) {
-            std::cout << "Renaming file " << std::endl;
+	    std::cout << "Renaming file " << std::endl;
             if (rename(get_path(tokens[1]).c_str(), get_path(tokens[2]).c_str() )) {
                 std::cout << "Failed to rename " << tokens[1] << " to " << tokens[2] << std::endl;
             }
-	  }
             //paths_added.erase(get_path(tokens[1]));
             //paths_added.insert(get_path(tokens[2]));
         } else if (action == "truncate") {
-	  if(!crash) {
             std::cout << "Truncating file " << std::endl;
             int result = handle_truncate(tokens);
             if (result) {
                 std::cout << "Failed to truncate file" << std::endl;
             }
-	  }
         } else if (action == "unlink") {
-	  if(!crash) {
             std::cout << "Unlinking (deleting) file " << std::endl; 
             std::string path = get_path(tokens[1]);
             int result = unlink(path.c_str());
             if(result) {
                 std::cout << "Failed to unlink (delete) file" << std::endl;
             }
-	  }
         } else if (action == "write") {
-	  if(!crash) {
             std::cout << "Writing file " << std::endl;
             if(!handle_write(tokens)) {
                 std::cout << "Failed to write to file" << std::endl;
             }
-	  }
         } else if (action == "falloc") {
-	  if(!crash) {
             if (handle_falloc(tokens)) {
                 std::cout << "Failed to fallocate" << std::endl;
             }
-	  }
         } else if (action == "remove") {
-	  if(!crash) {
             if (remove(get_path(tokens[FILENAME_INDEX]).c_str())) {
                 std::cout << "Failed to remove " << tokens[FILENAME_INDEX] << std::endl;
             }
-	  }
             //paths_added.erase(tokens[FILENAME_INDEX]);
         } else {
             unhandled_actions.insert(action);
