@@ -50,9 +50,6 @@ const char test_dir_prefix[] = "./test";
 #endif
 
 int crash = 0;
-#ifdef CRASH
-std::cout << "crash defined" << std::endl;
-#endif
 
 std::map<std::string, int> paths_to_fds;
 //std::set<std::string> paths_added;
@@ -63,7 +60,9 @@ int main(int argc, char** argv)
 #ifdef MLFS
 	init_fs();
 #endif
-
+#ifdef CRASH
+	std::cout << "crash defined" << std::endl;
+#endif
     std::set<std::string> unhandled_actions;
 
     std::string workload_dir = std::string(WORKLOAD_DIR);
