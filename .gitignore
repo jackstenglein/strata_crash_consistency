@@ -3,4 +3,5 @@ B/
 foo
 bar
 .DS_STORE
-./stata_read_ace_workload
+.vscode/
+.stata_read_ace_workload

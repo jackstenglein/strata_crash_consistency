@@ -21,7 +21,7 @@ LDFLAGS = -Wl,-rpath=$(abspath $(LIBFS_DIR)) \
 
 all: $(EXE)
 
-strata_read_ace_workload: strata_read_ace_workload.cpp
+strata_read_ace_workload: strata_read_ace_workload.o ace_runner.o fs_snapshot.o
 	$(CXX) -std=c++11 -g -Ofast -o $@ $^ -I$(INCLUDES) -L$(LIBFS_DIR) -lmlfs -DMLFS $(CFLAGS) $(LDFLAGS)
 
 clean:

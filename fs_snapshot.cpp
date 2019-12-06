@@ -1,23 +1,10 @@
-#include <sys/stat.h>
+#include "fs_snapshot.h"
 #include <string>
-#include <map>
 #include <cstring>
-#include <iostream>
-#include <fstream>
 
-// Represents a snapshot of single file.
-class FileSnapshot {
-	int status;
-	int error;
-	struct stat snapshot;
-
-  public:
-    FileSnapshot(const std::string);
-	FileSnapshot(std::ifstream&);
-	bool operator ==(const FileSnapshot other) const;
-	void printState() const;
-	void writeToFile(std::ofstream&) const;
-};
+/****************
+ * FileSnapshot *
+ ****************/
 
 // Takes a file path and calls stat to save the file information.
 FileSnapshot::FileSnapshot(const std::string path) {
@@ -70,16 +57,9 @@ void FileSnapshot::writeToFile(std::ofstream& out) const {
 }
 
 
-// Represents a snapshot of the filesystem.
-class FSSnapshot {
-	std::map<std::string, FileSnapshot> snapshots;
-  public:
-    FSSnapshot(const std::set<std::string>&);
-	FSSnapshot(std::string filename);
-	bool operator==(const FSSnapshot other) const;
-	void printState() const;
-	void writeToFile(std::string filename) const; 
-};
+/**************
+ * FSSnapshot *
+ **************/
 
 // Takes a map of filepaths to file descriptors and creates a snapshot of the 
 // files in the map.
@@ -90,6 +70,8 @@ FSSnapshot::FSSnapshot(const std::set<std::string>& paths) {
 	}
 }
 
+// Takes a path to a file previously written by FSSnapshot::writeToFile.
+// The file is read in to create a FSSnapshot object.
 FSSnapshot::FSSnapshot(std::string filename) {
 	std::ifstream infile;
 	std::string snapshotName;
