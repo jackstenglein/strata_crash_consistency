@@ -26,18 +26,21 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-// using namespace std;
+#define MINIMUM_ARGUMENTS 4
+#define ORACLE_MINIMUM_ARGUMENTS 5
+#define ORACLE_TEST_MODE "oracle"
+#define CRASH_TEST_MODE "crash"
 
-#define FILENAME_INDEX 1
-#define FLAGS_INDEX 2
-#define WORKLOAD_DIR "test"
+#define WORKLOAD_PATH_INDEX 1
+#define TEST_DIR_INDEX 2
+#define TEST_MODE_INDEX 3
+#define ORACLE_FILE_INDEX 4
 
 
 std::vector<std::string> tokenize(std::string str);
-void run_test(std::string test_file, std::set<std::string> &unhandled_actions);
+void runWorkload(std::string workloadFile, AbstractAceRunner* runner);
 void reset();
 const std::set<std::string> getFilePaths(std::string prefix);
-int test_fd;
 
 // #ifdef MLFS
 // const char test_dir_prefix[] = "/mlfs";
@@ -45,62 +48,68 @@ int test_fd;
 const char test_dir_prefix[] = "./test";
 // #endif
 
-std::set<std::string> paths;
-std::map<std::string, int> paths_to_fds;
-//std::set<std::string> paths_added;
 
-int main(int argc, char** argv)
-{    
-
-// #ifdef MLFS
-// 	init_fs();
-// #endif
-
-    std::set<std::string> unhandled_actions;
-
-    std::string workload_dir = std::string(WORKLOAD_DIR);
-    std::string separator = "/";
-    DIR *dir;
-    struct dirent *ent;
-    if ((dir = opendir(WORKLOAD_DIR)) != NULL) {
-        /* print all the files and directories within directory */
-        while ((ent = readdir(dir)) != NULL) {
-            std::string file = std::string(ent->d_name);
-            if (file != "." && file != "..") {
-                std::cout << workload_dir + separator + file << std::endl;
-                run_test(workload_dir + separator + file, unhandled_actions);
-            }
-        }
-        closedir(dir);
-    } else {
-        perror("Could not open directory test");
-        return EXIT_FAILURE;
+/* 
+  Runs an ACE workload with the given options.
+  Usage: ./strata_read_ace_workload WORKLOAD_PATH TEST_DIR oracle|crash <ORACLE_FILE>
+    
+    WORKLOAD_PATH is the path to the ACE workload file
+    TEST_DIR is the directory to run the ACE workload in 
+    oracle specifies running with an OracleAceRunner object
+    crash specifies running with a CrashAceRunner object
+    ORACLE_FILE is where the file system snapshot should be saved if running in oracle mode.
+*/
+int main(int argc, char** argv) {    
+    if (argc < MINIMUM_ARGUMENTS) {
+        std::cout << "Specify either oracle or crash mode." << std::endl;
+        return -1;
     }
 
-// #ifdef MLFS
-// 	shutdown_fs();
-// #endif
+    std::string workloadFile(argv[WORKLOAD_PATH_INDEX]);
+    std::string testDir(argv[TEST_DIR_INDEX]);
+    std::string testMode(argv[TEST_MODE_INDEX]);
+    AbstractAceRunner* runner = NULL;
 
-    // std::cout << "Unhandled Actions: ";
-    // for (std::set<std::string>::iterator it=unhandled_actions.begin(); it!=unhandled_actions.end(); ++it)
-    //     std::cout << ' ' << *it << std::endl;
-	return 0;
+    if (testMode == ORACLE_TEST_MODE) {
+        if (argc < ORACLE_MINIMUM_ARGUMENTS) {
+            std::cout << "ORACLE_DIR parameter is required to run oracle mode." << std::endl;
+            return -1;
+        }
+        std::string oracleFile(argv[ORACLE_FILE_INDEX]);
+        runner = new OracleAceRunner(testDir, oracleFile);
+    } else if (testMode == CRASH_TEST_MODE) {
+        runner = new CrashAceRunner(testDir);
+    } else {
+        std::cout << "Specify either oracle or crash mode."  << std::endl;
+        return -1;
+    }
+
+#ifdef MLFS
+	init_fs();
+#endif
+
+    int result = runWorkload(workloadFile, runner);
+    free(runner);
+
+#ifdef MLFS
+    shutdown_fs();
+#endif
+
+	return result;
 }
 
-void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
+void runWorkload(std::string workloadFile, AbstractAceRunner* runner) {
 
-    int err;
 	std::string line;
 	std::ifstream infile(test_file);
     while (std::getline(infile, line)) {
         if (line == "# run") break;
     }
 
-    CrashAceRunner runner;
     while (std::getline(infile, line)) {
         std::istringstream iss(line);
         std::vector<std::string> tokens = tokenize(line);
-        runner.handle_action(tokens);
+        runner->handle_action(tokens);
     }
     reset();
 }
@@ -159,6 +168,5 @@ void reset() {
     remove("test/B");
     
 #endif
-    //paths_added.clear();
 }
 

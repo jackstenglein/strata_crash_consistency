@@ -12,7 +12,8 @@
 #include <stdio.h>
 
 
-AbstractAceRunner::AbstractAceRunner(void) {
+AbstractAceRunner::AbstractAceRunner(std::string testDirectory) {
+	testDir = testDirectory;
 	actionHandlers.emplace("checkpoint", &AbstractAceRunner::handle_checkpoint);
 	actionHandlers.emplace("close", &AbstractAceRunner::handle_close);
 	actionHandlers.emplace("falloc", &AbstractAceRunner::handle_falloc);
@@ -30,37 +31,36 @@ AbstractAceRunner::AbstractAceRunner(void) {
 }
 
 
-const std::set<std::string> getFilePaths(std::string prefix) {
+const std::set<std::string> getAllFilePaths() {
 	std::set<std::string> paths;
-	paths.insert(prefix + "/A/C/foo");
-	paths.insert(prefix + "/A/C/bar");
-	paths.insert(prefix + "/A/foo");
-	paths.insert(prefix + "/B/foo");
-	paths.insert(prefix + "/A/bar");
-	paths.insert(prefix + "/B/bar");
-	paths.insert(prefix + "/foo");
-	paths.insert(prefix + "/bar");
-	paths.insert(prefix + "/A/C");
-	paths.insert(prefix + "/A");
-	paths.insert(prefix + "/B");
+	paths.insert(testDir + "/A/C/foo");
+	paths.insert(testDir + "/A/C/bar");
+	paths.insert(testDir + "/A/foo");
+	paths.insert(testDir + "/B/foo");
+	paths.insert(testDir + "/A/bar");
+	paths.insert(testDir + "/B/bar");
+	paths.insert(testDir + "/foo");
+	paths.insert(testDir + "/bar");
+	paths.insert(testDir + "/A/C");
+	paths.insert(testDir + "/A");
+	paths.insert(testDir + "/B");
 	return paths;
 }
 
-std::string get_path(std::string file) {
+std::string AbstractAceRunner::getFilePath(std::string file) {
     // Ace only has a finite number of paths, so just check for each individually
-    std::string path("test");
-    if (file == "ACfoo") return path + "/A/C/foo";
-    if (file == "ACbar") return path + "/A/C/bar";
-    if (file == "Afoo") return (path + "/A/foo");
-    if (file == "Bfoo") return (path + "/B/foo");
-    if (file == "Abar") return (path + "/A/bar");
-    if (file == "Bbar") return (path + "/B/bar");
-    if (file == "foo") return (path + "/foo");
-    if (file == "bar") return (path + "/bar");
-    if (file == "A") return (path + "/A");
-    if (file == "AC") return (path + "/A/C");
-    if (file == "B") return (path + "/B");
-    if (file == "test") return path;
+    if (file == "ACfoo") return testDir + "/A/C/foo";
+    if (file == "ACbar") return testDir + "/A/C/bar";
+    if (file == "Afoo") return (testDir + "/A/foo");
+    if (file == "Bfoo") return (testDir + "/B/foo");
+    if (file == "Abar") return (testDir + "/A/bar");
+    if (file == "Bbar") return (testDir + "/B/bar");
+    if (file == "foo") return (testDir + "/foo");
+    if (file == "bar") return (testDir + "/bar");
+    if (file == "A") return (testDir + "/A");
+    if (file == "AC") return (testDir + "/A/C");
+    if (file == "B") return (testDir + "/B");
+    if (file == "test") return testDir;
     return nullptr;
 }
 
@@ -228,6 +228,10 @@ int AbstractAceRunner::parse_open_flags(std::string flags) {
     }
 
     return result;
+}
+
+OracleAceRunner::OracleAceRunner(std::string oracleFile) {
+	outputFile = oracleFile;
 }
 
 int OracleAceRunner::handle_checkpoint(std::vector<std::string>& tokens) {

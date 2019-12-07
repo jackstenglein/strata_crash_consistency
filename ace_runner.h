@@ -8,8 +8,10 @@ class AbstractAceRunner {
 
 	private:
 		int test_fd;
+		std::string testDir;
 		handler_map actionHandlers;
 		std::map<std::string, int> fileDescriptors;
+		std::string getFilePath(std::string file);
 		virtual int handle_checkpoint(std::vector<std::string>& tokens) = 0;
 		int handle_close(std::vector<std::string>& tokens);
 		int handle_falloc(std::vector<std::string>& tokens);
@@ -27,13 +29,16 @@ class AbstractAceRunner {
 		int parse_falloc_flags(std::string flags);
 		int parse_open_flags(std::string flags);
 	public:
-	  	AbstractAceRunner(void);
+	  	AbstractAceRunner(std::string testDir);
 		int handle_action(std::vector<std::string>& tokens);
 };
 
 class OracleAceRunner : public AbstractAceRunner {
 	private:
+		std::string outputFile;
 		virtual int handle_checkpoint(std::vector<std::string>& tokens);
+	public:
+		OracleAceRunner(std::string, std::string);
 };
 
 class CrashAceRunner : public AbstractAceRunner {
