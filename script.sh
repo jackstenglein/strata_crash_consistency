@@ -2,7 +2,7 @@
 
 WORKLOADS_DIR=j-lang-files/*
 TEST_DIR=test
-#MLFS_DIR=  #strata's mount location
+MLFS_DIR=/mlfs  #strata's mount location
 ORACLE_FILE=oracle
 
 for d in $WORKLOADS_DIR
@@ -19,8 +19,8 @@ do
 	#echo "oracle file = $ORACLE_FILE"
 	
 	#run in oracle mode first
-	./build/strata_read_ace_workload $f $TEST_DIR oracle $ORACLE_FILE
+	./build/strata_read_ace_workload $f $MLFS_DIR oracle $ORACLE_FILE
 	#run in crash mode
-	./build/strata_read_ace_workload $f $TEST_DIR crash
+	./build/strata_read_ace_workload $f $MLFS_DIR crash
     done
 done
