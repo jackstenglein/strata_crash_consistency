@@ -2,6 +2,9 @@
 #include "fs_snapshot.h"
 #include <string>
 #include <iostream>
+#include <sys/types.h> /* for pid_t */
+#include <signal.h>  /* for kill */
+#include <errno.h>
 
 // C filesys operations
 #include <sys/stat.h>
@@ -237,7 +240,25 @@ int OracleAceRunner::handle_checkpoint(std::vector<std::string>& tokens) {
 
 CrashAceRunner::CrashAceRunner(std::string testDir) : AbstractAceRunner(testDir) {}
 
+//gets strata's pid to kill it
+pid_t get_pid() {
+    char buf[512];
+    FILE *cmd_pipe = popen("pidof -s kernfs", "r");
+    fgets(buf, 512, cmd_pipe);
+    pid_t pid = strtoul(buf, NULL, 10);
+    pclose(cmd_pipe);  
+    return pid;
+}
+
 int CrashAceRunner::handle_checkpoint(std::vector<std::string>& tokens) {
 	std::cout << "Checkpoint, crashing from CrashAceRunner." << std::endl;
+    pid_t pid = get_pid();
+    //kill strata
+    errno = kill(pid, SIGKILL);
+    if(!errno) {
+        std::cout << "Failed to kill kernfs (strata)." << std::endl;
+    }
+    //kill ourselves
+    raise(SIGKILL);
 	return 1;
 }
