@@ -2,7 +2,6 @@
 #include "fs_snapshot.h"
 #include <string>
 #include <iostream>
-#include <set>
 
 // C filesys operations
 #include <sys/stat.h>
