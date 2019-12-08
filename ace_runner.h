@@ -11,7 +11,7 @@ class AbstractAceRunner {
 		std::string testDir;
 		handler_map actionHandlers;
 		std::map<std::string, int> fileDescriptors;
-		const std::set<std::string> getAllFilePaths();
+		const std::set<std::string> getAllFilePaths(void);
 		std::string getFilePath(std::string file);
 		virtual int handle_checkpoint(std::vector<std::string>& tokens) = 0;
 		int handle_close(std::vector<std::string>& tokens);
