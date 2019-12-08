@@ -37,7 +37,7 @@
 #define ORACLE_FILE_INDEX 4
 
 std::vector<std::string> tokenize(std::string str);
-void runWorkload(std::string workloadFile, AbstractAceRunner* runner);
+int runWorkload(std::string workloadFile, AbstractAceRunner* runner);
 void reset();
 const std::set<std::string> getFilePaths(std::string prefix);
 
@@ -91,20 +91,26 @@ int main(int argc, char** argv) {
 	return result;
 }
 
-void runWorkload(std::string workloadFile, AbstractAceRunner* runner) {
+int runWorkload(std::string workloadFile, AbstractAceRunner* runner) {
 
 	std::string line;
-	std::ifstream infile(test_file);
+	std::ifstream infile(workloadFile);
     while (std::getline(infile, line)) {
         if (line == "# run") break;
     }
 
+    int result = 0;
     while (std::getline(infile, line)) {
         std::istringstream iss(line);
         std::vector<std::string> tokens = tokenize(line);
-        runner->handle_action(tokens);
+        result = runner->handle_action(tokens);
+        if (result != 0) {
+            std::cout << "FAILED workload on line: " << line << std::endl;
+            return result;
+        }
     }
     runner->reset();
+    return 0;
 }
 
 std::vector<std::string> tokenize(std::string str) {

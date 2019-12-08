@@ -223,7 +223,7 @@ void AbstractAceRunner::reset(void) {
 	}
 }
 
-OracleAceRunner::OracleAceRunner(std::string oracleFile) {
+OracleAceRunner::OracleAceRunner(std::string testDirectory, std::string oracleFile) : AbstractAceRunner(testDirectory) {
 	outputFile = oracleFile;
 }
 
