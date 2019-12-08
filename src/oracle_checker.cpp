@@ -3,7 +3,7 @@
 #define MINIMUM_ARGUMENTS 4
 #define ORACLE_FILE_INDEX 1
 #define FS_DIR_INDEX 2
-#define OUTPUT_FILE_INDEX_3
+#define OUTPUT_FILE_INDEX 3
 
 const std::set<std::string> getAllFilePaths(std::string);
 void reportFailure(FSSnapshot&, FSSnapshot&, std::string);
@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
     shutdown_fs();
 #endif
 
-	return result;
+	return 0;
 }
 
 const std::set<std::string> getAllFilePaths(std::string fsDir) {
@@ -63,15 +63,15 @@ const std::set<std::string> getAllFilePaths(std::string fsDir) {
 }
 
 void reportFailure(FSSnapshot& oracleSnapshot, FSSnapshot& currentSnapshot, std::string outputFile) {
-	std::ofstream outfile;
-	outfile.open(filename, std::ios::out|std::ios::trunc);
-	if ( ! outfile.is_open()) {
+	std::ofstream out;
+	out.open(outputFile, std::ios::out|std::ios::trunc);
+	if ( ! out.is_open()) {
 		std::cout << "Failed to open output file" << std::endl;
 		return;
 	}
-	outfile << "ORACLE SNAPSHOT\n";
-	oracleSnapshot.printState(outfile);
-	outfile << "\nCURRENT SNAPSHOT\n";
-	currentSnapshot.printState(outfile);
-	outfile.close(); 
+	out << "ORACLE SNAPSHOT\n";
+	oracleSnapshot.printState(out);
+	out << "\nCURRENT SNAPSHOT\n";
+	currentSnapshot.printState(out);
+	out.close(); 
 }
