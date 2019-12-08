@@ -24,12 +24,12 @@ OUTPUT_FILE=report/test.txt #write failed crash checking reports
 	#run in oracle mode first
 	./build/strata_read_ace_workload $f $MLFS_DIR oracle $ORACLE_FILE
 	#run in crash mode
-	#./build/strata_read_ace_workload $f $MLFS_DIR cras
+	./build/strata_read_ace_workload $f $MLFS_DIR crash
 	#restart strata
-	sudo ./run.sh /home/strata_cc/strata/kernfs/tests/kernfs 
+	#sudo /home/strata_cc/strata/kernfs/tests/run.sh kernfs
 	
 	#run oracle checker
-        ./build/oracle_checker $ORACLE_FILE $MLFS_DIR $OUTPUT_FILE
+        #./build/oracle_checker $ORACLE_FILE $MLFS_DIR $OUTPUT_FILE
 	
     #done
 #done
