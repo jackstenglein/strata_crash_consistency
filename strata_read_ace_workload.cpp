@@ -36,17 +36,10 @@
 #define TEST_MODE_INDEX 3
 #define ORACLE_FILE_INDEX 4
 
-
 std::vector<std::string> tokenize(std::string str);
 void runWorkload(std::string workloadFile, AbstractAceRunner* runner);
 void reset();
 const std::set<std::string> getFilePaths(std::string prefix);
-
-// #ifdef MLFS
-// const char test_dir_prefix[] = "/mlfs";
-// #else
-const char test_dir_prefix[] = "./test";
-// #endif
 
 
 /* 
@@ -111,7 +104,7 @@ void runWorkload(std::string workloadFile, AbstractAceRunner* runner) {
         std::vector<std::string> tokens = tokenize(line);
         runner->handle_action(tokens);
     }
-    reset();
+    runner->reset();
 }
 
 std::vector<std::string> tokenize(std::string str) {
@@ -129,44 +122,3 @@ std::vector<std::string> tokenize(std::string str) {
     }
     return result;
 }
-
-
-void reset() {
-    std::cout << "RESET CALLED" << std::endl;
-    //std::cout << paths_added.size() << std::endl;
-#ifdef MLFS
-    //remove files first
-    remove("/mlfs/A/C/foo");
-    remove("/mlfs/A/C/bar");
-    remove("/mlfs/A/foo");
-    remove("/mlfs/B/foo");
-    remove("/mlfs/A/bar");
-    remove("/mlfs/B/bar");
-    remove("/mlfs/foo");
-    remove("/mlfs/bar");
-    remove("/mlfs/B/bar");
-    
-    //remove directories
-    remove("/mlfs/A");
-    remove("/mlfs/A/C");
-    remove("/mlfs/B");
-#else
-    //remove files first
-    remove("test/A/C/foo");
-    remove("test/A/C/bar");
-    remove("test/A/foo");
-    remove("test/B/foo");
-    remove("test/A/bar");
-    remove("test/B/bar");
-    remove("test/foo");
-    remove("test/bar");
-    remove("test/B/bar");
-    
-    //remove directories
-    remove("test/A");
-    remove("test/A/C");
-    remove("test/B");
-    
-#endif
-}
-

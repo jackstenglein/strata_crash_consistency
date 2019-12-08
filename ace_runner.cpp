@@ -31,7 +31,7 @@ AbstractAceRunner::AbstractAceRunner(std::string testDirectory) {
 }
 
 
-const std::set<std::string> getAllFilePaths() {
+const std::set<std::string> AbstractAceRunner::getAllFilePaths() {
 	std::set<std::string> paths;
 	paths.insert(testDir + "/A/C/foo");
 	paths.insert(testDir + "/A/C/bar");
@@ -75,7 +75,6 @@ int AbstractAceRunner::handle_action(std::vector<std::string>& tokens) {
 }
 
 int AbstractAceRunner::handle_close(std::vector<std::string>& tokens) {
-	std::cout << "close" << std::endl;
 	int fd = fileDescriptors[get_path(tokens[1])];            
 	return close(fd);
 }
@@ -95,16 +94,13 @@ int AbstractAceRunner::handle_falloc(std::vector<std::string>& tokens) {
 }
 
 int AbstractAceRunner::handle_fdatasync(std::vector<std::string>& tokens) {
-	std::cout << "fdatasync" << std::endl;
 	return fdatasync(fileDescriptors[get_path(tokens[1])]);
 }
 
 int AbstractAceRunner::handle_fsync(std::vector<std::string>& tokens) {
-	std::cout << "fsync" << std::endl;
-	if(tokens[1] == "test") {
+	if (tokens[1] == "test") {
 		return fsync(test_fd);
-	}
-	else {
+	} else {
 		return fsync(fileDescriptors[get_path(tokens[1])]);
 	}
 }
@@ -114,7 +110,6 @@ int AbstractAceRunner::handle_mkdir(std::vector<std::string>& tokens) {
     const int perm_index = 2;
     std::string c_dir_name = get_path(tokens[dir_index]);
     int permissions = std::stoi(tokens[perm_index], nullptr, 8);
-    std::cout << "Create directory " << c_dir_name << " with base 10 permissions " << permissions << std::endl;
     return mkdir(c_dir_name.c_str(), (mode_t)permissions);
 }
 
@@ -127,14 +122,11 @@ int AbstractAceRunner::handle_open(std::vector<std::string>& tokens) {
     const int flags = parse_open_flags(tokens[flag_index]);
     const int permissions = std::stoi(tokens[perm_index], nullptr, 8);
 
-    std::cout << "Flags string: " << tokens[flag_index] << std::endl;
-    std::cout << "Open file " << file_path << " with base 10 permissions " << permissions << " and base 10 flags " << flags << std::endl;
-    
     int fd = open(file_path.c_str(), flags, permissions);
 
     if (fd > 0) {
         fileDescriptors[file_path] = fd;
-        if(tokens[1] == "test") {
+        if (tokens[1] == "test") {
             test_fd = fd;
         }
     }
@@ -142,13 +134,8 @@ int AbstractAceRunner::handle_open(std::vector<std::string>& tokens) {
 }
 
 int AbstractAceRunner::handle_opendir(std::vector<std::string>& tokens) {
-	std::cout << "opendir" << std::endl;
 	tokens.insert(tokens.begin() + 2, "O_DIRECTORY");
-	int fd = handle_open(tokens);
-	if (fd < 0) {
-		std::cout << "Failed to open directory." << std::endl;
-	}
-	return fd;
+	return handle_open(tokens);
 }
 
 int AbstractAceRunner::handle_remove(std::vector<std::string>& tokens) {
@@ -157,12 +144,10 @@ int AbstractAceRunner::handle_remove(std::vector<std::string>& tokens) {
 }
 
 int AbstractAceRunner::handle_rename(std::vector<std::string>& tokens) {
-	std::cout << "Renaming file " << std::endl;
     return rename( get_path(tokens[1]).c_str(), get_path(tokens[2]).c_str() );
 }
 
 int AbstractAceRunner::handle_sync(std::vector<std::string>& tokens) {
-	std::cout << "sync" << std::endl;
 	sync();
 	return 1;
 }
@@ -174,7 +159,6 @@ int AbstractAceRunner::handle_truncate(std::vector<std::string>& tokens) {
 }
 
 int AbstractAceRunner::handle_unlink(std::vector<std::string>& tokens) {
-	std::cout << "Unlinking (deleting) file " << std::endl; 
 	std::string path = get_path(tokens[1]);
 	return unlink(path.c_str()); 
 }
@@ -230,6 +214,15 @@ int AbstractAceRunner::parse_open_flags(std::string flags) {
     return result;
 }
 
+void AbstractAceRunner::reset(void) {
+    std::cout << "RESET CALLED" << std::endl;
+    //std::cout << paths_added.size() << std::endl;
+	std::set<std::string> filePaths = getAllFilePaths();
+	for (std::string file : filePaths) {
+		remove(file.c_str());
+	}
+}
+
 OracleAceRunner::OracleAceRunner(std::string oracleFile) {
 	outputFile = oracleFile;
 }
@@ -237,9 +230,9 @@ OracleAceRunner::OracleAceRunner(std::string oracleFile) {
 int OracleAceRunner::handle_checkpoint(std::vector<std::string>& tokens) {
 	std::cout << "Checkpoint, saving file state." << std::endl;
 	// Crash happens
-	FSSnapshot snapshot(getFilePaths("/mlfs"));
+	FSSnapshot snapshot(getAllFilePaths());
 	snapshot.printState();
-	snapshot.writeToFile("testfile.txt");
+	snapshot.writeToFile(outputFile);
 	return 1;
 }
 
