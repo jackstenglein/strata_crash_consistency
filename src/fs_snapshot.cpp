@@ -121,7 +121,3 @@ void FSSnapshot::writeToFile(std::string filename) const {
 
 	outfile.close();
 }
-
-void FSSnapshot::writeToStream(std::ofstream& out) const {
-
-}
