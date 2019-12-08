@@ -5,7 +5,7 @@
 // Compares two stat structs and returns true if the snapshots
 // are equal. The inode, access time, modified time and change
 // time fields are not compared.
-bool snapshotsEqual(struct stat* lhs, struct stat* rhs) {
+bool snapshotsEqual(const struct stat* lhs, const struct stat* rhs) {
 	if (lhs->st_dev != rhs->st_dev) return false;
 	if (lhs->st_mode != rhs->st_mode) return false;
 	if (lhs->st_nlink != rhs->st_nlink) return false;
