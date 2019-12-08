@@ -38,6 +38,7 @@ int main(int argc, char** argv) {
 	FSSnapshot currentSnapshot(getAllFilePaths(fsDir));
 	if (oracleSnapshot == currentSnapshot) {
 		std::cout << "TEST PASSED" << std::endl;
+		reportFailure(oracleSnapshot, currentSnapshot, outputFile);
 	} else {
 		std::cout << "TEST FAILED" << std::endl;
 		reportFailure(oracleSnapshot, currentSnapshot, outputFile);
