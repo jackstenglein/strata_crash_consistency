@@ -3,7 +3,7 @@
 WORKLOADS_DIR=j-lang-files/*
 TEST_DIR=test
 MLFS_DIR=/mlfs  #strata's mount location
-ORACLE_FILE=oracle
+ORACLE_FILE=oracle/test.txt
 
 for d in $WORKLOADS_DIR
 do
