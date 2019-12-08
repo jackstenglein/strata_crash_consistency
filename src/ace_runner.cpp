@@ -221,9 +221,7 @@ void AbstractAceRunner::reset(void) {
     //std::cout << paths_added.size() << std::endl;
 	std::set<std::string> filePaths = getAllFilePaths();
 	for (std::string file : filePaths) {
-		if(remove(file.c_str())) {
-            perror("Unable to remove %s:", file.c_str());
-        }
+		remove(file.c_str());
 	}
 }
 
