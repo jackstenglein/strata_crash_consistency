@@ -104,7 +104,7 @@ int runWorkload(std::string workloadFile, AbstractAceRunner* runner) {
         std::istringstream iss(line);
         std::vector<std::string> tokens = tokenize(line);
         result = runner->handle_action(tokens);
-        if (result != 0) {
+        if (result < 0) {
             std::cout << "FAILED workload on line: " << line << std::endl;
             return result;
         }
