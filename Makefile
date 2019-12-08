@@ -1,9 +1,12 @@
 CC = g++
-EXE = strata_read_ace_workload
+RUNNER_EXE = strata_read_ace_workload
+CHECKER_EXE = oracle_checker
 SOURCE_DIR = src
 BUILD_DIR = build
-SOURCES = $(wildcard $(SOURCE_DIR)/*.cpp)
-OBJECTS = $(patsubst $(SOURCE_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SOURCES))
+RUNNER_SOURCES = $(SOURCE_DIR)/ace_runner.cpp $(SOURCE_DIR)/fs_snapshot.cpp $(SOURCE_DIR)/$(EXE).cpp
+RUNNER_OBJECTS = $(patsubst $(SOURCE_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(RUNNER_SOURCES))
+CHECKER_SOURCES = $(SOURCE_DIR)/fs_snapshot.cpp $(SOURCE_DIR)/oracle_checker.cpp
+CHECKER_OBJECTS = $(patsubst $(SOURCE_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(CHECKER_SOURCES))
 
 CUR_DIR = $(shell pwd)
 LIBFS_DIR = $(CUR_DIR)/../strata/libfs/build/
@@ -23,19 +26,23 @@ LDFLAGS = -Wl,-rpath=$(abspath $(LIBFS_DIR)) \
 		  -Wl,-rpath=$(abspath $(NVML_DIR)) \
 		  -lpthread -lrt -lm -lssl -lcrypto
 
-all: dir $(BUILD_DIR)/$(EXE)
+all: dir runner checker
+
+runner: $(BUILD_DIR)/$(RUNNER_EXE)
+
+checker: $(BUILD_DIR)/$(CHECKER_EXE)
 
 dir:
 	mkdir -p $(BUILD_DIR)
 
-$(BUILD_DIR)/$(EXE): $(OBJECTS)
-	$(CXX) -std=c++11 -g -Ofast -o $@ $^ -I$(INCLUDES) -L$(LIBFS_DIR) -lmlfs -DMLFS $(CFLAGS) $(LDFLAGS)
-
-$(OBJECTS): $(BUILD_DIR)/%.o : $(SOURCE_DIR)/%.cpp
+$(BUILD_DIR)/%.o : $(SOURCE_DIR)/%.cpp
 	$(CXX) -g -c $< -o $@
 
-strata_read_ace_workload: strata_read_ace_workload.o ace_runner.o fs_snapshot.o
+$(BUILD_DIR)/$(RUNNER_EXE): $(RUNNER_OBJECTS)
+	$(CXX) -std=c++11 -g -Ofast -o $@ $^ -I$(INCLUDES) -L$(LIBFS_DIR) -lmlfs -DMLFS $(CFLAGS) $(LDFLAGS)
+
+$(BUILD_DIR)/$(CHECKER_EXE): $(CHECKER_OBJECTS) 
 	$(CXX) -std=c++11 -g -Ofast -o $@ $^ -I$(INCLUDES) -L$(LIBFS_DIR) -lmlfs -DMLFS $(CFLAGS) $(LDFLAGS)
 
 clean:
-	rm -rf $(BUILD_DIR)/*o $(BUILD_DIR)/$(EXE)
+	rm -rf $(BUILD_DIR)/*o $(BUILD_DIR)/$(RUNNER_EXE)

@@ -33,20 +33,20 @@ bool FileSnapshot::operator==(const FileSnapshot other) const {
 }
 
 // Prints the fields of the file's stat struct at the time of the snapshot.
-void FileSnapshot::printState() const {
-	printf("\t\tDevice: %d\n", snapshot.st_dev);
-	printf("\t\tInode: %d\n", snapshot.st_ino);
-	printf("\t\tMode: %d\n", snapshot.st_mode);
-	printf("\t\tHard Links: %d\n", snapshot.st_nlink);
-	printf("\t\tUser ID: %d\n", snapshot.st_uid);
-	printf("\t\tGroup ID: %d\n", snapshot.st_gid);
-	printf("\t\tRdev: %d\n", snapshot.st_rdev);
-	printf("\t\tSize: %d\n", snapshot.st_size);
-	printf("\t\tBlock size: %d\n", snapshot.st_blksize);
-	printf("\t\tBlocks: %d\n", snapshot.st_blocks);
-	printf("\t\tAccess time: %lld.%.9ld\n", (long long)snapshot.st_atim.tv_sec, snapshot.st_atim.tv_nsec);
-	printf("\t\tModified time: %lld.%.9ld\n", (long long)snapshot.st_mtim.tv_sec, snapshot.st_mtim.tv_nsec);
-	printf("\t\tChange time: %lld.%.9ld\n", (long long)snapshot.st_ctim.tv_sec, snapshot.st_ctim.tv_nsec);
+void FileSnapshot::printState(std::ostream& out) const {
+	out << "\t\tDevice: " << snapshot.st_dev << std::endl;
+	out << "\t\tInode: " << snapshot.st_ino << std::endl;
+	out << "\t\tMode: " << snapshot.st_mode << std::endl;
+	out << "\t\tHard Links: " << snapshot.st_nlink << std::endl;
+	out << "\t\tUser ID: " << snapshot.st_uid << std::endl;
+	out << "\t\tGroup ID: " << snapshot.st_gid << std::endl;
+	out << "\t\tRdev: " << snapshot.st_rdev << std::endl;
+	out << "\t\tSize: " << snapshot.st_size << std::endl;
+	out << "\t\tBlock size: " << snapshot.st_blksize << std::endl;
+	out << "\t\tBlocks: " << snapshot.st_blocks << std::endl;
+	out << "\t\tAccess time: " << (long long)snapshot.st_atim.tv_sec << "." << snapshot.st_atim.tv_nsec << std::endl;
+	out << "\t\tModified time: " << (long long)snapshot.st_mtim.tv_sec << "." << snapshot.st_mtim.tv_nsec << std::endl;
+	out << "\t\tChange time: " << (long long)snapshot.st_ctim.tv_sec << "." << snapshot.st_ctim.tv_nsec << std::endl;
 }
 
 // Writes the file snapshot info to the given output stream.
@@ -96,13 +96,13 @@ bool FSSnapshot::operator==(const FSSnapshot other) const {
 }
 
 // Prints the state of each file in the snapshot.
-void FSSnapshot::printState() const {
-	printf("*** BEGIN FS SNAPSHOT ***\n");
+void FSSnapshot::printState(std::ostream& out) const {
+	out << "*** BEGIN FS SNAPSHOT ***\n";
 	for (auto it = snapshots.cbegin(); it != snapshots.cend(); ++it) {
-		printf("\n\t%s\n", it->first.c_str());
-		it->second.printState();
+		out << "\n\t" << it->first.c_str() << "\n";
+		it->second.printState(out);
 	}
-	printf("\n*** END FS SNAPSHOT ***\n");
+	out << "\n*** END FS SNAPSHOT ***\n";
 }
 
 // Writes the FSSnapshot to the specified file.
@@ -120,4 +120,8 @@ void FSSnapshot::writeToFile(std::string filename) const {
 	}	
 
 	outfile.close();
+}
+
+void FSSnapshot::writeToStream(std::ofstream& out) const {
+
 }

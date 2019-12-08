@@ -14,7 +14,7 @@ class FileSnapshot {
     FileSnapshot(const std::string);
 	FileSnapshot(std::ifstream&);
 	bool operator ==(const FileSnapshot other) const;
-	void printState() const;
+	void printState(std::ostream&) const;
 	void writeToFile(std::ofstream&) const;
 };
 
@@ -25,6 +25,6 @@ class FSSnapshot {
     FSSnapshot(const std::set<std::string>&);
 	FSSnapshot(std::string filename);
 	bool operator==(const FSSnapshot other) const;
-	void printState() const;
+	void printState(std::ostream&) const;
 	void writeToFile(std::string filename) const; 
 };

@@ -233,7 +233,7 @@ int OracleAceRunner::handle_checkpoint(std::vector<std::string>& tokens) {
 	std::cout << "Checkpoint, saving file state." << std::endl;
 	// Crash happens
 	FSSnapshot snapshot(getAllFilePaths());
-	snapshot.printState();
+	snapshot.printState(std::cout);
 	snapshot.writeToFile(outputFile);
 	return 1;
 }
