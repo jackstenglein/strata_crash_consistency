@@ -46,4 +46,6 @@ class OracleAceRunner : public AbstractAceRunner {
 class CrashAceRunner : public AbstractAceRunner {
 	private:
 		virtual int handle_checkpoint(std::vector<std::string>& tokens);
+	public:
+		CrashAceRunner(std::string);
 };

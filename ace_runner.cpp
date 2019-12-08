@@ -236,6 +236,8 @@ int OracleAceRunner::handle_checkpoint(std::vector<std::string>& tokens) {
 	return 1;
 }
 
+CrashAceRunner::CrashAceRunner(std::string testDir) : AbstractAceRunner(testDir) {}
+
 int CrashAceRunner::handle_checkpoint(std::vector<std::string>& tokens) {
 	std::cout << "Checkpoint, crashing from CrashAceRunner." << std::endl;
 	return 1;
