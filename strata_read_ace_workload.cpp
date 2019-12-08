@@ -34,7 +34,7 @@
 
 
 std::vector<std::string> tokenize(std::string str);
-void run_test(std::string test_file, std::set<std::string> &unhandled_actions);
+void run_test(std::string test_file);
 void reset();
 const std::set<std::string> getFilePaths(std::string prefix);
 int test_fd;
@@ -56,21 +56,17 @@ int main(int argc, char** argv)
 // 	init_fs();
 // #endif
 
-    std::set<std::string> unhandled_actions;
+    //std::set<std::string> unhandled_actions;
 
     std::string workload_dir = std::string(WORKLOAD_DIR);
     std::string separator = "/";
     DIR *dir;
-    struct dirent *ent;
+    //struct dirent *ent;
     if ((dir = opendir(WORKLOAD_DIR)) != NULL) {
         /* print all the files and directories within directory */
-        while ((ent = readdir(dir)) != NULL) {
-            std::string file = std::string(ent->d_name);
-            if (file != "." && file != "..") {
-                std::cout << workload_dir + separator + file << std::endl;
-                run_test(workload_dir + separator + file, unhandled_actions);
-            }
-        }
+        //std::string file = std::string(ent->d_name);
+        //std::cout << workload_dir + separator + file << std::endl;
+        run_test(argv[1]);
         closedir(dir);
     } else {
         perror("Could not open directory test");
@@ -81,13 +77,10 @@ int main(int argc, char** argv)
 // 	shutdown_fs();
 // #endif
 
-    // std::cout << "Unhandled Actions: ";
-    // for (std::set<std::string>::iterator it=unhandled_actions.begin(); it!=unhandled_actions.end(); ++it)
-    //     std::cout << ' ' << *it << std::endl;
 	return 0;
 }
 
-void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
+void run_test(std::string test_file) {
 
     int err;
 	std::string line;
@@ -95,11 +88,13 @@ void run_test(std::string test_file, std::set<std::string> &unhandled_actions) {
     while (std::getline(infile, line)) {
         if (line == "# run") break;
     }
-
-    CrashAceRunner runner;
+    
     while (std::getline(infile, line)) {
         std::istringstream iss(line);
         std::vector<std::string> tokens = tokenize(line);
+        
+	CrashAceRunner runner; 
+	
         runner.handle_action(tokens);
     }
     reset();
