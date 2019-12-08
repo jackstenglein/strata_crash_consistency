@@ -80,6 +80,7 @@ int main(int argc, char** argv) {
 #ifdef MLFS
     std::cout << "Initializing strata" << std::endl;
 	init_fs();
+
 #endif
 
     int result = runWorkload(workloadFile, runner);
@@ -111,7 +112,7 @@ int runWorkload(std::string workloadFile, AbstractAceRunner* runner) {
             break;
         }
     }
-    runner->reset();
+    //runner->reset();
     return 0;
 }
 
