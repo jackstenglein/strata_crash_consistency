@@ -12,7 +12,6 @@ class AbstractAceRunner {
 		std::string testDir;
 		handler_map actionHandlers;
 		std::map<std::string, int> fileDescriptors;
-		const std::set<std::string> getAllFilePaths(void);
 		std::string getFilePath(std::string file);
 		virtual int handle_checkpoint(std::vector<std::string>& tokens) = 0;
 		int handle_close(std::vector<std::string>& tokens);
@@ -30,6 +29,8 @@ class AbstractAceRunner {
 		int handle_write(std::vector<std::string>& tokens);
 		int parse_falloc_flags(std::string flags);
 		int parse_open_flags(std::string flags);
+	protected:
+		const std::set<std::string> getAllFilePaths(void);
 	public:
 	  	AbstractAceRunner(std::string testDir);
 		int handle_action(std::vector<std::string>& tokens);
