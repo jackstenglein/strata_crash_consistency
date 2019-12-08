@@ -5,3 +5,5 @@ bar
 .DS_STORE
 .vscode/
 .stata_read_ace_workload
+build/
+oracle/
