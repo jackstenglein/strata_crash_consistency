@@ -1,5 +1,9 @@
 #include "fs_snapshot.h"
 
+#ifdef MLFS
+#include <mlfs/mlfs_interface.h>	
+#endif
+
 #define MINIMUM_ARGUMENTS 4
 #define ORACLE_FILE_INDEX 1
 #define FS_DIR_INDEX 2

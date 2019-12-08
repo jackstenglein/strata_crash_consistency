@@ -2,12 +2,30 @@
 #include <string>
 #include <cstring>
 
+// Compares two stat structs and returns true if the snapshots
+// are equal. The inode, access time, modified time and change
+// time fields are not compared.
+bool snapshotsEqual(struct stat* lhs, struct stat* rhs) {
+	if (lhs->st_dev != rhs->st_dev) return false;
+	if (lhs->st_mode != rhs->st_mode) return false;
+	if (lhs->st_nlink != rhs->st_nlink) return false;
+	if (lhs->st_uid != rhs->st_uid) return false;
+	if (lhs->st_gid != rhs->st_gid) return false;
+	if (lhs->st_rdev != rhs->st_rdev) return false;
+	if (lhs->st_size != rhs->st_size) return false;
+	if (lhs->st_blksize != rhs->st_blksize) return false;
+	if (lhs->st_blocks != rhs->st_blocks) return false;
+
+	return true;
+}
+
 /****************
  * FileSnapshot *
  ****************/
 
 // Takes a file path and calls stat to save the file information.
 FileSnapshot::FileSnapshot(const std::string path) {
+	memset(&snapshot, 0, sizeof(struct stat));
 	status = stat(path.c_str(), &snapshot);
 	if (status == -1) {
 		error = errno;
@@ -29,7 +47,10 @@ bool FileSnapshot::operator==(const FileSnapshot other) const {
 	if (status != other.status || error != other.error) {
 		return false;
 	}
-	return ! memcmp(&snapshot, &other.snapshot, sizeof(struct stat)); // TODO: this might not work b/c of access time
+
+	// We can't use memcmp on the stat struct because
+	// the access times will be different.
+	return snapshotsEqual(&snapshot, &other.snapshot);
 }
 
 // Prints the fields of the file's stat struct at the time of the snapshot.
