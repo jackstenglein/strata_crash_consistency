@@ -220,7 +220,9 @@ void AbstractAceRunner::reset(void) {
     //std::cout << paths_added.size() << std::endl;
     std::set<std::string> filePaths = getAllFilePaths();
     for (std::string file : filePaths) {
-	remove(file.c_str());
+        if (file != "/mlfs/B" && file != "/mlfs/foo") {
+	    remove(file.c_str());
+	}
     }
 }
 

@@ -34,6 +34,13 @@ int main(int argc, char** argv) {
     init_fs();
 #endif
 
+#ifdef MLFS
+    shutdown_fs();
+#endif
+    
+#ifdef MLFS
+    init_fs();
+#endif
     FSSnapshot oracleSnapshot(oracleFile);
     FSSnapshot currentSnapshot(getAllFilePaths(fsDir));
     if (oracleSnapshot == currentSnapshot) {
