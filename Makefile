@@ -36,7 +36,7 @@ dir:
 	mkdir -p $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o : $(SOURCE_DIR)/%.cpp
-	$(CXX) -g -c $< -o $@
+	$(CXX) -g -c $< -o $@ -I$(INCLUDES) -L$(LIBFS_DIR) -lmlfs -DMLFS $(CFLAGS) $(LDFLAGS)
 
 $(BUILD_DIR)/$(RUNNER_EXE): $(RUNNER_OBJECTS)
 	$(CXX) -std=c++11 -g -Ofast -o $@ $^ -I$(INCLUDES) -L$(LIBFS_DIR) -lmlfs -DMLFS $(CFLAGS) $(LDFLAGS)

@@ -78,6 +78,7 @@ int main(int argc, char** argv) {
     }
 
 #ifdef MLFS
+    std::cout << "Initializing strata" << std::endl;
 	init_fs();
 #endif
 
@@ -106,7 +107,8 @@ int runWorkload(std::string workloadFile, AbstractAceRunner* runner) {
         result = runner->handle_action(tokens);
         if (result < 0) {
             std::cout << "FAILED workload on line: " << line << std::endl;
-            return result;
+            perror("");
+            break;
         }
     }
     runner->reset();

@@ -221,7 +221,9 @@ void AbstractAceRunner::reset(void) {
     //std::cout << paths_added.size() << std::endl;
 	std::set<std::string> filePaths = getAllFilePaths();
 	for (std::string file : filePaths) {
-		remove(file.c_str());
+		if(remove(file.c_str())) {
+            perror("Unable to remove %s:", file.c_str());
+        }
 	}
 }
 
@@ -240,7 +242,7 @@ int OracleAceRunner::handle_checkpoint(std::vector<std::string>& tokens) {
 
 CrashAceRunner::CrashAceRunner(std::string testDir) : AbstractAceRunner(testDir) {}
 
-//gets strata's pid to kill it
+// Gets strata's pid to kill it
 pid_t get_pid() {
     char buf[512];
     FILE *cmd_pipe = popen("pidof -s kernfs", "r");
@@ -252,13 +254,14 @@ pid_t get_pid() {
 
 int CrashAceRunner::handle_checkpoint(std::vector<std::string>& tokens) {
 	std::cout << "Checkpoint, crashing from CrashAceRunner." << std::endl;
+    
+    // Kill strata
     pid_t pid = get_pid();
-    //kill strata
-    errno = kill(pid, SIGKILL);
-    if(!errno) {
-        std::cout << "Failed to kill kernfs (strata)." << std::endl;
+    if (kill(pid, SIGKILL)) {
+        perror("Failed to kill kernfs (strata)");
     }
-    //kill ourselves
+    
+    // Kill ourselves
     raise(SIGKILL);
 	return 1;
 }
