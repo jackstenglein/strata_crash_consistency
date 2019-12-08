@@ -46,11 +46,11 @@ const std::set<std::string> getFilePaths(std::string prefix);
   Runs an ACE workload with the given options.
   Usage: ./strata_read_ace_workload WORKLOAD_PATH TEST_DIR oracle|crash <ORACLE_FILE>
     
-    WORKLOAD_PATH is the path to the ACE workload file
-    TEST_DIR is the directory to run the ACE workload in 
-    oracle specifies running with an OracleAceRunner object
-    crash specifies running with a CrashAceRunner object
-    ORACLE_FILE is where the file system snapshot should be saved if running in oracle mode.
+  WORKLOAD_PATH is the path to the ACE workload file
+  TEST_DIR is the directory to run the ACE workload in 
+  oracle specifies running with an OracleAceRunner object
+  crash specifies running with a CrashAceRunner object
+  ORACLE_FILE is where the file system snapshot should be saved if running in oracle mode.
 */
 int main(int argc, char** argv) {    
     if (argc < MINIMUM_ARGUMENTS) {
@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
 
 #ifdef MLFS
     std::cout << "Initializing strata" << std::endl;
-	init_fs();
+    init_fs();
 
 #endif
 
@@ -95,8 +95,8 @@ int main(int argc, char** argv) {
 
 int runWorkload(std::string workloadFile, AbstractAceRunner* runner) {
 
-	std::string line;
-	std::ifstream infile(workloadFile);
+    std::string line;
+    std::ifstream infile(workloadFile);
     while (std::getline(infile, line)) {
         if (line == "# run") break;
     }
