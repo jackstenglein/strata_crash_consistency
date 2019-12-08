@@ -112,7 +112,7 @@ int runWorkload(std::string workloadFile, AbstractAceRunner* runner) {
             break;
         }
     }
-   // runner->reset();
+    runner->reset();
     return 0;
 }
 

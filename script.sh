@@ -17,7 +17,8 @@ do
 	#echo "workload file = $f"
 	#echo "test dir = $TEST_DIR"
 	#echo "oracle file = $ORACLE_FILE"
-	
+
+	echo "testing workload $f"
 	#run in oracle mode first
 	./build/strata_read_ace_workload $f $MLFS_DIR oracle $ORACLE_FILE
 	#run in crash mode
