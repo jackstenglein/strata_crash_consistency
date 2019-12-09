@@ -38,19 +38,23 @@ int main(int argc, char** argv) {
 #endif
 
     int result;
-    FSSnapshot oracleSnapshot("/mlfs/oracle2", getAllFilePaths("/mlfs/oracle2"));
+    FSSnapshot oracleSnapshot(oracleFile);
     FSSnapshot currentSnapshot(fsDir, getAllFilePaths(fsDir));
     if (oracleSnapshot == currentSnapshot) {
         std::cout << "TEST PASSED" << std::endl;
         result = 0;
-        // reportFailure(oracleSnapshot, currentSnapshot, outputFile);
+        reportFailure(oracleSnapshot, currentSnapshot, outputFile);
     } else {
         std::cout << "TEST FAILED" << std::endl;
         result = 1;
 	reportFailure(oracleSnapshot, currentSnapshot, outputFile);
     }
 
-    reset(fsDir);
+    //reset(fsDir);
+    int err = remove("/mlfs/test4/oof");
+    if (err != 0) {
+	    std::cout << "Remove error: " << err << std::endl;
+    }
 
 #ifdef MLFS
     shutdown_fs();

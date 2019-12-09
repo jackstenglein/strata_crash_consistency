@@ -18,7 +18,7 @@ int main() {
 	#endif
 	
 	struct stat result;
-	stat("/mlfs/oracle2/oof", &result);
+	stat("/mlfs/test4/oof", &result);
 	std::cout << "Stats: " << std::endl;
 	printStats(&result);
 
