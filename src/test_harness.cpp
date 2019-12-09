@@ -111,7 +111,7 @@ int runCrasher(const char* workloadFile) {
 	}
 	if (cpid == 0) {
 		execl(CRASH_EXE_PATH, "strata_read_ace_workload", workloadFile, "test/crash", "crash", NULL);
-		perror("Failed to exec oracle");
+		perror("Failed to exec crasher");
 		exit(EXIT_FAILURE);
 	}
 

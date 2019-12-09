@@ -21,8 +21,9 @@ class FileSnapshot {
 // Represents a snapshot of the filesystem.
 class FSSnapshot {
 	std::map<std::string, FileSnapshot> snapshots;
+	std::string mountDir;
   public:
-    FSSnapshot(const std::set<std::string>&);
+    FSSnapshot(std::string, const std::set<std::string>&);
 	FSSnapshot(std::string filename);
 	bool operator==(const FSSnapshot other) const;
 	void printState(std::ostream&) const;

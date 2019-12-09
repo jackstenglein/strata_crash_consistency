@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
     init_fs();
 #endif
     FSSnapshot oracleSnapshot(oracleFile);
-    FSSnapshot currentSnapshot(getAllFilePaths(fsDir));
+    FSSnapshot currentSnapshot(fsDir, getAllFilePaths(fsDir));
     if (oracleSnapshot == currentSnapshot) {
         std::cout << "TEST PASSED" << std::endl;
         reportFailure(oracleSnapshot, currentSnapshot, outputFile);

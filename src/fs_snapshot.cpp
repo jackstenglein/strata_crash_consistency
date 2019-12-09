@@ -84,10 +84,12 @@ void FileSnapshot::writeToFile(std::ofstream& out) const {
 
 // Takes a map of filepaths to file descriptors and creates a snapshot of the 
 // files in the map.
-FSSnapshot::FSSnapshot(const std::set<std::string>& paths) {
+FSSnapshot::FSSnapshot(std::string _mountDir, const std::set<std::string>& paths) {
+	mountDir = _mountDir;
 	for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
 		FileSnapshot* snapshot = new FileSnapshot(*it);
-		snapshots.insert(std::pair<std::string, FileSnapshot>(*it, *snapshot));
+		std::string fileName = paths.substr(mountDir.size());
+		snapshots.insert(std::pair<std::string, FileSnapshot>(fileName, *snapshot));
 	}
 }
 
@@ -113,13 +115,6 @@ FSSnapshot::FSSnapshot(std::string filename) {
 // Compares two FSSnapshot objects. They are equal if they have the same FileSnapshot
 // objects.
 bool FSSnapshot::operator==(const FSSnapshot other) const {
-    if (snapshots.size != other.snapshots.size()) {
-	return false;
-    }
-    
-    for (auto it = snapshots.cbegin(); it != snapshots.cend(); ++it) {
-	    std::string fileName = 
-	
 	return snapshots == other.snapshots;
 }
 
@@ -127,7 +122,7 @@ bool FSSnapshot::operator==(const FSSnapshot other) const {
 void FSSnapshot::printState(std::ostream& out) const {
 	out << "*** BEGIN FS SNAPSHOT ***\n";
 	for (auto it = snapshots.cbegin(); it != snapshots.cend(); ++it) {
-		out << "\n\t" << it->first.c_str() << "\n";
+		out << "\n\t" << mountDir << "/" << it->first.c_str() << "\n";
 		it->second.printState(out);
 	}
 	out << "\n*** END FS SNAPSHOT ***\n";
