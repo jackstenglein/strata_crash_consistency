@@ -9,7 +9,6 @@ class AbstractAceRunner {
 
 	private:
 		int test_fd;
-		std::string testDir;
 		handler_map actionHandlers;
 		std::map<std::string, int> fileDescriptors;
 		std::string getFilePath(std::string file);
@@ -31,6 +30,7 @@ class AbstractAceRunner {
 		int parse_open_flags(std::string flags);
 	protected:
 		const std::set<std::string> getAllFilePaths(void);
+		std::string testDir;
 	public:
 	  	AbstractAceRunner(std::string testDir);
 		int handle_action(std::vector<std::string>& tokens);

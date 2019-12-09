@@ -88,7 +88,7 @@ FSSnapshot::FSSnapshot(std::string _mountDir, const std::set<std::string>& paths
 	mountDir = _mountDir;
 	for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
 		FileSnapshot* snapshot = new FileSnapshot(*it);
-		std::string fileName = paths.substr(mountDir.size());
+		std::string fileName = (*it).substr(mountDir.size());
 		snapshots.insert(std::pair<std::string, FileSnapshot>(fileName, *snapshot));
 	}
 }
@@ -122,7 +122,7 @@ bool FSSnapshot::operator==(const FSSnapshot other) const {
 void FSSnapshot::printState(std::ostream& out) const {
 	out << "*** BEGIN FS SNAPSHOT ***\n";
 	for (auto it = snapshots.cbegin(); it != snapshots.cend(); ++it) {
-		out << "\n\t" << mountDir << "/" << it->first.c_str() << "\n";
+		out << "\n\t" << mountDir << it->first.c_str() << "\n";
 		it->second.printState(out);
 	}
 	out << "\n*** END FS SNAPSHOT ***\n";
