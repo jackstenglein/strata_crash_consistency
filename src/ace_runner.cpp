@@ -227,14 +227,12 @@ int AbstractAceRunner::parse_open_flags(std::string flags) {
 
 void AbstractAceRunner::reset(void) {
     std::cout << "Resetting oracle directory" << std::endl;
-    //std::cout << paths_added.size() << std::endl;
     std::vector<std::string> filePaths = getAllFilePaths();
     for (std::string file : filePaths) {
-        //if (file != "/mlfs/A") {
-	    if (remove(file.c_str())) {
-		    // perror("Failed to remove");
-	    }
-	//}
+	    int result = remove(file.c_str());
+		if (result < 0 && errno != ENOENT) {
+            perror("*** Failed to remove in reset");
+        }
     }
 }
 

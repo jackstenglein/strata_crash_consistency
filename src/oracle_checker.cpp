@@ -60,19 +60,23 @@ const std::vector<std::string> getAllFilePaths(std::string fsDir) {
     std::vector<std::string> paths;
     paths.push_back(fsDir + "/A/C/oof");
     paths.push_back(fsDir + "/A/C/bar");
+    paths.push_back(fsDir + "/A/C");
+
     paths.push_back(fsDir + "/A/oof");
     paths.push_back(fsDir + "/A/foo");
-    paths.push_back(fsDir + "/D/oof");
     paths.push_back(fsDir + "/A/bar");
-    paths.push_back(fsDir + "/D/bar");
-    paths.push_back(fsDir + "/oof");
-    paths.push_back(fsDir + "/bar");
-    paths.push_back(fsDir + "/A/C");
     paths.push_back(fsDir + "/A");
+
+    paths.push_back(fsDir + "/D/oof");
+    paths.push_back(fsDir + "/D/bar");
     paths.push_back(fsDir + "/D");
+
     paths.push_back(fsDir + "/B/foo");
     paths.push_back(fsDir + "/B/bar");
     paths.push_back(fsDir + "/B");
+
+    paths.push_back(fsDir + "/oof");
+    paths.push_back(fsDir + "/bar");
     paths.push_back(fsDir + "/foo");
     return paths;
 }
@@ -95,6 +99,9 @@ void reset(std::string fsDir) {
     std::cout << "Resetting crash directory" << std::endl;
     std::vector<std::string> filePaths = getAllFilePaths(fsDir);
     for (std::string file : filePaths) {
-	    remove(file.c_str());
+	    int result = remove(file.c_str());
+        if (result < 0 && errno != ENOENT) {
+            perror("*** Failed to remove in reset");
+        }
     }
 }
