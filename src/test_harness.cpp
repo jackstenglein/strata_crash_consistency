@@ -42,8 +42,9 @@ int main(int argc, char** argv) {
 			std::string workloadName(entry->d_name);
 			if (workloadName != "." && workloadName != "..") {
 				err = runTest(workloadDir, oracleDir, reportDir, workloadName);
-				if (err < 0) {
-					break;
+				if (err) {
+		//			std::cout << "Aborting remaining tests" << std::endl;
+		//			exit(-1);
 				}
 			}
 		}
@@ -52,7 +53,7 @@ int main(int argc, char** argv) {
     closedir(dp);
 }
 
-void runTest(std::string workloadDir, std::string oracleDir, std::string reportDir, std::string workloadName) {
+int runTest(std::string workloadDir, std::string oracleDir, std::string reportDir, std::string workloadName) {
 	std::cout << "Testing " << workloadName << std::endl;
 
 	std::string separator("/");
@@ -66,19 +67,19 @@ void runTest(std::string workloadDir, std::string oracleDir, std::string reportD
 	std::cout << "Report file: " << reportFile << std::endl;
 
 	status = runOracle(workloadFile.c_str(), oracleFile.c_str());
-	if (status < 0) {
+	if (status != 0) {
 		std::cout << "Oracle Failed!" << std::endl;
 		return -1;
 	}
 
 	status = runCrasher(workloadFile.c_str());
-	if (status < 0) {
+	if (status != 0) {
 		std::cout << "Crasher failed!" << std::endl;
 		return -1;
 	}
 	
 	status = runChecker(oracleFile.c_str(), reportFile.c_str());
-	if (status < 0) {
+	if (status != 0) {
 		std::cout << "Checker failed!" << std::endl;
 		return -1;
 	}
@@ -94,7 +95,7 @@ int runOracle(const char* workloadFile, const char* oracleFile) {
 	}
 	if (cpid == 0) {
 		// Child process
-		execl(ORACLE_EXE_PATH, "strata_read_ace_workload", workloadFile, "/mlfs/oracle", "oracle", oracleFile, NULL);
+		execl(ORACLE_EXE_PATH, "strata_read_ace_workload", workloadFile, "/mlfs/oracle2", "oracle", oracleFile, NULL);
 		perror("Failed to exec oracle");
 		exit(EXIT_FAILURE);
 	} 
@@ -116,7 +117,7 @@ int runCrasher(const char* workloadFile) {
 		return -1;
 	}
 	if (cpid == 0) {
-		execl(CRASH_EXE_PATH, "strata_read_ace_workload", workloadFile, "/mlfs/crash", "crash", NULL);
+		execl(CRASH_EXE_PATH, "strata_read_ace_workload", workloadFile, "/mlfs/crash2", "oracle", "oracle/testOracle", NULL);
 		perror("Failed to exec crasher");
 		exit(EXIT_FAILURE);
 	}
@@ -139,7 +140,7 @@ int runChecker(const char* oracleFile, const char* reportFile) {
 		return -1;
 	}
 	if (cpid == 0) {
-		execl(CHECKER_EXE_PATH, "oracle_checker", oracleFile, "/mlfs/crash", reportFile, NULL);
+		execl(CHECKER_EXE_PATH, "oracle_checker", oracleFile, "/mlfs/crash2", reportFile, NULL);
 		perror("Failed to exec checker");
 		exit(EXIT_FAILURE);
 	}
