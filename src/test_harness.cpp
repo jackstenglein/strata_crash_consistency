@@ -14,7 +14,7 @@
 #define ORACLE_DIR_INDEX 2
 #define REPORT_DIR_INDEX 3
 
-void runTest(std::string, std::string, std::string, std::string);
+int runTest(std::string, std::string, std::string, std::string);
 int runOracle(const char*, const char*);
 int runCrasher(const char*);
 int runChecker(const char*, const char*);
@@ -33,6 +33,7 @@ int main(int argc, char** argv) {
 	std::string reportDir(argv[REPORT_DIR_INDEX]);
 
 	// Read all files in workload directory
+	int err;
 	struct dirent *entry = nullptr;
     DIR *dp = nullptr;
     dp = opendir(workloadDir.c_str());
@@ -40,7 +41,10 @@ int main(int argc, char** argv) {
         while ((entry = readdir(dp))) {
 			std::string workloadName(entry->d_name);
 			if (workloadName != "." && workloadName != "..") {
-				runTest(workloadDir, oracleDir, reportDir, workloadName);
+				err = runTest(workloadDir, oracleDir, reportDir, workloadName);
+				if (err < 0) {
+					break;
+				}
 			}
 		}
     }
@@ -64,19 +68,22 @@ void runTest(std::string workloadDir, std::string oracleDir, std::string reportD
 	status = runOracle(workloadFile.c_str(), oracleFile.c_str());
 	if (status < 0) {
 		std::cout << "Oracle Failed!" << std::endl;
-		return;
+		return -1;
 	}
 
 	status = runCrasher(workloadFile.c_str());
 	if (status < 0) {
 		std::cout << "Crasher failed!" << std::endl;
-		return;
+		return -1;
 	}
 	
 	status = runChecker(oracleFile.c_str(), reportFile.c_str());
 	if (status < 0) {
 		std::cout << "Checker failed!" << std::endl;
+		return -1;
 	}
+
+	return 0;
 }
 
 int runOracle(const char* workloadFile, const char* oracleFile) {
@@ -87,7 +94,7 @@ int runOracle(const char* workloadFile, const char* oracleFile) {
 	}
 	if (cpid == 0) {
 		// Child process
-		execl(ORACLE_EXE_PATH, "strata_read_ace_workload", workloadFile, "test/oracle", "oracle", oracleFile, NULL);
+		execl(ORACLE_EXE_PATH, "strata_read_ace_workload", workloadFile, "/mlfs/oracle", "oracle", oracleFile, NULL);
 		perror("Failed to exec oracle");
 		exit(EXIT_FAILURE);
 	} 
@@ -99,7 +106,7 @@ int runOracle(const char* workloadFile, const char* oracleFile) {
 		return -1;
 	}
 	std::cout << "Finished waiting on oracle" << std::endl;
-	return status;
+	return WEXITSTATUS(status);
 }
 
 int runCrasher(const char* workloadFile) {
@@ -109,7 +116,7 @@ int runCrasher(const char* workloadFile) {
 		return -1;
 	}
 	if (cpid == 0) {
-		execl(CRASH_EXE_PATH, "strata_read_ace_workload", workloadFile, "test/crash", "crash", NULL);
+		execl(CRASH_EXE_PATH, "strata_read_ace_workload", workloadFile, "/mlfs/crash", "crash", NULL);
 		perror("Failed to exec crasher");
 		exit(EXIT_FAILURE);
 	}
@@ -122,7 +129,7 @@ int runCrasher(const char* workloadFile) {
 		return -1;
 	}
 	std::cout << "Finished waiting on crasher" << std::endl;
-	return status;
+	return WEXITSTATUS(status);
 }
 
 int runChecker(const char* oracleFile, const char* reportFile) {
@@ -132,7 +139,7 @@ int runChecker(const char* oracleFile, const char* reportFile) {
 		return -1;
 	}
 	if (cpid == 0) {
-		execl(CHECKER_EXE_PATH, "oracle_checker", oracleFile, "test/crash", reportFile, NULL);
+		execl(CHECKER_EXE_PATH, "oracle_checker", oracleFile, "/mlfs/crash", reportFile, NULL);
 		perror("Failed to exec checker");
 		exit(EXIT_FAILURE);
 	}
@@ -144,5 +151,5 @@ int runChecker(const char* oracleFile, const char* reportFile) {
 		return -1;
 	}
 	std::cout << "Finished waiting on checker" << std::endl;
-	return status;
+	return WEXITSTATUS(status);
 }

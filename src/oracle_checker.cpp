@@ -11,7 +11,7 @@
 
 const std::vector<std::string> getAllFilePaths(std::string);
 void reportFailure(FSSnapshot&, FSSnapshot&, std::string);
-void reset(std::string fsDir);
+int reset(std::string fsDir);
 
 /* 
   Checks the current state of the file system against the given oracle file.
@@ -37,23 +37,25 @@ int main(int argc, char** argv) {
     init_fs();
 #endif
 
+    int result = -1;
     FSSnapshot oracleSnapshot(oracleFile);
     FSSnapshot currentSnapshot(fsDir, getAllFilePaths(fsDir));
     if (oracleSnapshot == currentSnapshot) {
         std::cout << "TEST PASSED" << std::endl;
+        result = 0;
         // reportFailure(oracleSnapshot, currentSnapshot, outputFile);
     } else {
         std::cout << "TEST FAILED" << std::endl;
         reportFailure(oracleSnapshot, currentSnapshot, outputFile);
     }
 
-    reset(fsDir);
+    result |= reset(fsDir);
 
 #ifdef MLFS
     shutdown_fs();
 #endif
 
-    return 0;
+    return result;
 }
 
 const std::vector<std::string> getAllFilePaths(std::string fsDir) {
@@ -96,12 +98,15 @@ void reportFailure(FSSnapshot& oracleSnapshot, FSSnapshot& currentSnapshot, std:
 }
 
 void reset(std::string fsDir) {
+    int result = 0;
     std::cout << "Resetting crash directory" << std::endl;
     std::vector<std::string> filePaths = getAllFilePaths(fsDir);
     for (std::string file : filePaths) {
-	    int result = remove(file.c_str());
-        if (result < 0 && errno != ENOENT) {
+	    int err = remove(file.c_str());
+        if (err < 0 && err != -ENOENT && errno != ENOENT) {
             perror("*** Failed to remove in reset");
+            result = -1;
         }
     }
+    return result;
 }
