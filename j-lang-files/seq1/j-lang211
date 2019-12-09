@@ -21,9 +21,9 @@ local_checkpoint
 # run
 mkdir A 0777
 open bar O_RDWR|O_CREAT 0777
-close bar
-rename bar Abar
+link bar Abar
 opendir A 0777
 fsync A
 checkpoint 1
+close bar
 close A

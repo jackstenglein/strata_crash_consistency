@@ -19,10 +19,8 @@ local_checkpoint
 
 
 # run
-open foo O_RDWR|O_CREAT 0777
-close foo
-remove foo
-open foo O_RDWR|O_CREAT 0777
-fsync foo
+open oof O_RDWR|O_CREAT 0777
+write oof 0 32768
+mmapwrite oof 32768 32768
 checkpoint 1
-close foo
+close oof

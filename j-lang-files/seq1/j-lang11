@@ -20,8 +20,8 @@ local_checkpoint
 
 # run
 mkdir A 0777
-mkdir B 0777
-opendir B 0777
-fsync B
+mkdir D 0777
+opendir D 0777
+fsync D
 checkpoint 1
-close B
+close D

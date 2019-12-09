@@ -20,7 +20,7 @@ local_checkpoint
 
 # run
 mkdir A 0777
-open Afoo O_RDWR|O_CREAT 0777
+open Aoof O_RDWR|O_CREAT 0777
 sync
 checkpoint 1
-close Afoo
+close Aoof

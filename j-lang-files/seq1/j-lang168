@@ -19,8 +19,8 @@ local_checkpoint
 
 
 # run
-open bar O_RDWR|O_CREAT 0777
-close bar
-unlink bar
+mkdir A 0777
+open Aoof O_RDWR|O_CREAT 0777
+dwrite Aoof 0 32768
 sync
 checkpoint 1

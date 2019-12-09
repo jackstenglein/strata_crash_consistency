@@ -19,11 +19,11 @@ local_checkpoint
 
 
 # run
-open foo O_RDWR|O_CREAT 0777
-write foo 0 32768
-falloc foo FALLOC_FL_ZERO_RANGE|FALLOC_FL_KEEP_SIZE 32768 32768
+open oof O_RDWR|O_CREAT 0777
+write oof 0 32768
+falloc oof FALLOC_FL_ZERO_RANGE|FALLOC_FL_KEEP_SIZE 32768 32768
 opendir test 0777
 fsync test
 checkpoint 1
-close foo
+close oof
 close test

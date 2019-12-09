@@ -20,9 +20,9 @@ local_checkpoint
 
 # run
 mkdir A 0777
-open Afoo O_RDWR|O_CREAT 0777
-write Afoo 0 32768
-falloc Afoo FALLOC_FL_ZERO_RANGE|FALLOC_FL_KEEP_SIZE 0 5000
+open Aoof O_RDWR|O_CREAT 0777
+write Aoof 0 32768
+falloc Aoof FALLOC_FL_ZERO_RANGE|FALLOC_FL_KEEP_SIZE 0 5000
 sync
 checkpoint 1
-close Afoo
+close Aoof

@@ -19,11 +19,11 @@ local_checkpoint
 
 
 # run
-open foo O_RDWR|O_CREAT 0777
-write foo 0 32768
-falloc foo FALLOC_FL_ZERO_RANGE 32768 32768
+open oof O_RDWR|O_CREAT 0777
+write oof 0 32768
+falloc oof FALLOC_FL_ZERO_RANGE 32768 32768
 open bar O_RDWR|O_CREAT 0777
 fsync bar
 checkpoint 1
-close foo
+close oof
 close bar

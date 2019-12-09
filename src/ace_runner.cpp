@@ -34,34 +34,40 @@ AbstractAceRunner::AbstractAceRunner(std::string testDirectory) {
 
 const std::set<std::string> AbstractAceRunner::getAllFilePaths(void) {
     std::set<std::string> paths;
-    paths.insert(testDir + "/A/C/foo");
+    paths.insert(testDir + "/A/C/oof");
     paths.insert(testDir + "/A/C/bar");
-    paths.insert(testDir + "/A/foo");
-    paths.insert(testDir + "/B/foo");
+    paths.insert(testDir + "/A/oof");
+    paths.insert(testDir + "/D/oof");
     paths.insert(testDir + "/A/bar");
-    paths.insert(testDir + "/B/bar");
-    paths.insert(testDir + "/foo");
+    paths.insert(testDir + "/D/bar");
+    paths.insert(testDir + "/oof");
     paths.insert(testDir + "/bar");
     paths.insert(testDir + "/A/C");
     paths.insert(testDir + "/A");
-    paths.insert(testDir + "/B");
+    paths.insert(testDir + "/D");
+    //paths.insert(testDir + "/B");
+    //paths.insert(testDir + "/B/foo");
+    //paths.insert(testDir + "/foo");
     return paths;
 }
 
 std::string AbstractAceRunner::getFilePath(std::string file) {
     // Ace only has a finite number of paths, so just check for each individually
-    if (file == "ACfoo") return testDir + "/A/C/foo";
+    if (file == "ACoof") return testDir + "/A/C/oof";
     if (file == "ACbar") return testDir + "/A/C/bar";
-    if (file == "Afoo") return (testDir + "/A/foo");
-    if (file == "Bfoo") return (testDir + "/B/foo");
+    if (file == "Aoof") return (testDir + "/A/oof");
+    if (file == "Doof") return (testDir + "/D/oof");
     if (file == "Abar") return (testDir + "/A/bar");
-    if (file == "Bbar") return (testDir + "/B/bar");
-    if (file == "foo") return (testDir + "/foo");
+    if (file == "Dbar") return (testDir + "/D/bar");
+    if (file == "oof") return (testDir + "/oof");
     if (file == "bar") return (testDir + "/bar");
     if (file == "A") return (testDir + "/A");
     if (file == "AC") return (testDir + "/A/C");
-    if (file == "B") return (testDir + "/B");
+    if (file == "D") return (testDir + "/D");
     if (file == "test") return testDir;
+    //if (file == "B") return (testDir + "/B");
+    //if (file == "Bfoo") return (testDir + "/B/foo");
+    //if (file == "foo") return (testDir + "/foo");
     return nullptr;
 }
 
@@ -220,9 +226,9 @@ void AbstractAceRunner::reset(void) {
     //std::cout << paths_added.size() << std::endl;
     std::set<std::string> filePaths = getAllFilePaths();
     for (std::string file : filePaths) {
-        if (file != "/mlfs/B" && file != "/mlfs/foo") {
+        //if (file != "/mlfs/A") {
 	    remove(file.c_str());
-	}
+	//}
     }
 }
 

@@ -1,0 +1,5 @@
+# run
+mkdir D 0777
+open Doof O_RDWR|O_CREAT 0777
+remove Doof 
+checkpoint 1

@@ -60,17 +60,17 @@ int main(int argc, char** argv) {
 
 const std::set<std::string> getAllFilePaths(std::string fsDir) {
     std::set<std::string> paths;
-    paths.insert(fsDir + "/A/C/foo");
+    paths.insert(fsDir + "/A/C/oof");
     paths.insert(fsDir + "/A/C/bar");
-    paths.insert(fsDir + "/A/foo");
-    paths.insert(fsDir + "/B/foo");
+    paths.insert(fsDir + "/A/oof");
+    paths.insert(fsDir + "/D/oof");
     paths.insert(fsDir + "/A/bar");
-    paths.insert(fsDir + "/B/bar");
-    paths.insert(fsDir + "/foo");
+    paths.insert(fsDir + "/D/bar");
+    paths.insert(fsDir + "/oof");
     paths.insert(fsDir + "/bar");
     paths.insert(fsDir + "/A/C");
     paths.insert(fsDir + "/A");
-    paths.insert(fsDir + "/B");
+    paths.insert(fsDir + "/D");
     return paths;
 }
 
