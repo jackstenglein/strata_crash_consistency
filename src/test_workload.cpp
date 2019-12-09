@@ -8,8 +8,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <iostream>
 
-void printState(
+void printState(struct stat*);
 
 int main() {
 	#ifdef MLFS
