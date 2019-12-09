@@ -20,10 +20,6 @@ local_checkpoint
 
 # run
 open oof O_RDWR|O_CREAT 0777
-write oof 0 32768
-falloc oof FALLOC_FL_PUNCH_HOLE|FALLOC_FL_KEEP_SIZE 32768 32768
-opendir test 0777
-fsync test
+fsync oof
 checkpoint 1
 close oof
-close test

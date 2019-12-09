@@ -19,10 +19,10 @@ local_checkpoint
 
 
 # run
-open oof O_RDWR|O_CREAT 0777
-link oof bar
+open foo O_RDWR|O_CREAT 0777
+close foo
+rename foo bar
 open bar O_RDWR|O_CREAT 0777
 fsync bar
 checkpoint 1
-close oof
 close bar

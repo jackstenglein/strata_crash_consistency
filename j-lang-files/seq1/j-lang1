@@ -19,9 +19,9 @@ local_checkpoint
 
 
 # run
-open oof O_RDWR|O_CREAT 0777
+open foo O_RDWR|O_CREAT 0777
 opendir test 0777
 fsync test
 checkpoint 1
-close oof
+close foo
 close test

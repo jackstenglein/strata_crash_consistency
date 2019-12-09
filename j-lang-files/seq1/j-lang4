@@ -19,7 +19,7 @@ local_checkpoint
 
 
 # run
-open oof O_RDWR|O_CREAT 0777
+open foo O_RDWR|O_CREAT 0777
 sync
 checkpoint 1
-close oof
+close foo

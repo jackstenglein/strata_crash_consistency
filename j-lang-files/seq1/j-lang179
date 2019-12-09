@@ -19,8 +19,11 @@ local_checkpoint
 
 
 # run
-open oof O_RDWR|O_CREAT 0777
-write oof 0 32768
-mmapwrite oof 0 8192
+mkdir A 0777
+open Afoo O_RDWR|O_CREAT 0777
+close Afoo
+remove Afoo
+open Abar O_RDWR|O_CREAT 0777
+fsync Abar
 checkpoint 1
-close oof
+close Abar
