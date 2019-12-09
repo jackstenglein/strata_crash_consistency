@@ -11,6 +11,7 @@
 
 const std::vector<std::string> getAllFilePaths(std::string);
 void reportFailure(FSSnapshot&, FSSnapshot&, std::string);
+void reportSuccess(FSSnapshot&, FSSnapshot&, std::string);
 int reset(std::string fsDir);
 
 /* 
