@@ -137,7 +137,7 @@ int AbstractAceRunner::handle_open(std::vector<std::string>& tokens) {
 
     std::cout << "File path: " << file_path << ", flags: " << flags << ", permissions: " << permissions << std::endl;
     int fd = open(file_path.c_str(), flags, permissions);
-    std::cout << "File path: " << file_path << "fd: " << fd << std::endl;
+    std::cout << "File path: " << file_path << ", fd: " << fd << std::endl;
 
     if (fd > 0) {
         fileDescriptors[file_path] = fd;

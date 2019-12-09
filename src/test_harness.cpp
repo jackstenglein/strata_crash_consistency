@@ -71,7 +71,12 @@ int runTest(std::string workloadDir, std::string workloadName) {
 	std::string oracleFile = ("oracle/" + workloadName);
 	std::string reportFile = ("report/" + workloadName);
 
-	int status = runOracle(oracleDir, workloadFile, oracleFile);
+	int status = createTestDirectories(oracleDir, crashDir);
+	if (status != 0) {
+		return -1;
+	}
+
+	status = runOracle(oracleDir, workloadFile, oracleFile);
 	if (status != 0) {
 		std::cout << "Oracle Failed!" << std::endl;
 		return -1;
