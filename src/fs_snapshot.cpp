@@ -104,6 +104,7 @@ FSSnapshot::FSSnapshot(std::string filename) {
 		return;
 	}
 
+	std::getline(infile, mountDir);
 	while(std::getline(infile, snapshotName)) {
 		FileSnapshot snapshot(infile);
 		snapshots.insert(std::pair<std::string, FileSnapshot>(snapshotName, snapshot));
@@ -137,6 +138,7 @@ void FSSnapshot::writeToFile(std::string filename) const {
 		return;
 	}
 
+	outfile << mountDir << '\n';
 	for (auto it = snapshots.cbegin(); it != snapshots.cend(); ++it) {
 		outfile << it->first << '\n';
 		it->second.writeToFile(outfile);
