@@ -18,6 +18,7 @@ void runTest(std::string, std::string, std::string, std::string);
 int runOracle(const char*, const char*);
 int runCrasher(const char*);
 int runChecker(const char*, const char*);
+int runCleanup(void);
 
 /*
 	Usage: ./test_harness WORKLOAD_DIR ORACLE_DIR REPORT_DIR
@@ -76,8 +77,12 @@ void runTest(std::string workloadDir, std::string oracleDir, std::string reportD
 	status = runChecker(oracleFile.c_str(), reportFile.c_str());
 	if (status < 0) {
 		std::cout << "Checker failed!" << std::endl;
-		return;
 	}
+
+	status = runCleanup();
+	if (status < 0) {
+		std::cout << "Cleanup failed!" << std::endl;
+	} 
 }
 
 int runOracle(const char* workloadFile, const char* oracleFile) {
@@ -145,5 +150,30 @@ int runChecker(const char* oracleFile, const char* reportFile) {
 		return -1;
 	}
 	std::cout << "Finished waiting on checker" << std::endl;
+	return status;
+}
+
+// Run the oracle but on the crash directory and with a workload that only 
+// checkpoints. This will clean the crash directory when the oracle resets.
+int runCleanup(void) {
+	pid_t cpid = fork();
+	if (cpid == -1) {
+		perror("Failed to fork oracle");
+		return -1;
+	}
+	if (cpid == 0) {
+		// Child process
+		execl(ORACLE_EXE_PATH, "strata_read_ace_workload", "test/checkpoint_only", "test/crash", "oracle", "oracle/scratch", NULL);
+		perror("Failed to exec oracle");
+		exit(EXIT_FAILURE);
+	} 
+
+	int status;
+	pid_t wpid = waitpid(cpid, &status, 0);
+	if (wpid == -1) {
+		perror("Failed to wait on oracle cleanup");
+		return -1;
+	}
+	std::cout << "Finished waiting on oracle cleanup" << std::endl;
 	return status;
 }
