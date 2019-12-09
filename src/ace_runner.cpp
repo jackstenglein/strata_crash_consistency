@@ -122,7 +122,7 @@ int AbstractAceRunner::handle_mkdir(std::vector<std::string>& tokens) {
     const int dir_index = 1;
     const int perm_index = 2;
     std::string c_dir_name = getFilePath(tokens[dir_index]);
-    int permissions = std::stoi(tokens[perm_index], nullptr, 8);
+    int permissions = std::stoi(tokens[perm_index], nullptr, 10);
     return mkdir(c_dir_name.c_str(), (mode_t)permissions);
 }
 
@@ -133,7 +133,7 @@ int AbstractAceRunner::handle_open(std::vector<std::string>& tokens) {
 
     std::string file_path = getFilePath(tokens[file_index]);
     const int flags = parse_open_flags(tokens[flag_index]);
-    const int permissions = std::stoi(tokens[perm_index], nullptr, 8);
+    const int permissions = std::stoi(tokens[perm_index], nullptr, 10);
 
     std::cout << "File path: " << file_path << ", flags: " << flags << ", permissions: " << permissions << std::endl;
     int fd = open(file_path.c_str(), flags, permissions);

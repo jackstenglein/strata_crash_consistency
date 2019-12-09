@@ -5,6 +5,12 @@
 #include <unistd.h>
 #include <string>
 #include <iostream>
+#include <sys/stat.h>
+
+#ifdef MLFS
+#include <mlfs/mlfs_interface.h>	
+#endif
+
 
 #define ORACLE_EXE_PATH "build/strata_read_ace_workload"
 #define CRASH_EXE_PATH "build/strata_read_ace_workload"
@@ -15,8 +21,9 @@
 #define REPORT_DIR_INDEX 3
 
 int runTest(std::string, std::string, std::string, std::string);
-int runOracle(const char*, const char*);
-int runCrasher(const char*);
+int createTestDirectories(std::string, std::string);
+int runOracle(std::string, std::string, std::string);
+int runCrasher(std::string, std::string);
 int runChecker(const char*, const char*);
 
 /*
@@ -26,6 +33,7 @@ int main(int argc, char** argv) {
 
 	if (argc < 4) {
 		std::cout << "Usage: ./test_harness WORKLOAD_DIR ORACLE_DIR REPORT_DIR" << std::endl;
+		return -1;
 	}
 
 	std::string workloadDir(argv[WORKLOAD_DIR_INDEX]);
@@ -43,8 +51,8 @@ int main(int argc, char** argv) {
 			if (workloadName != "." && workloadName != "..") {
 				err = runTest(workloadDir, oracleDir, reportDir, workloadName);
 				if (err) {
-		//			std::cout << "Aborting remaining tests" << std::endl;
-		//			exit(-1);
+					std::cout << "Aborting remaining tests" << std::endl;
+					return -1;
 				}
 			}
 		}
@@ -57,28 +65,29 @@ int runTest(std::string workloadDir, std::string oracleDir, std::string reportDi
 	std::cout << "Testing " << workloadName << std::endl;
 
 	std::string separator("/");
+	std::string oracleDir = ("/mlfs/oracle-" + workloadName);
+	std::string crashDir = ("/mlfs/crash-" + workloadName);
 	std::string workloadFile = (workloadDir + separator + workloadName);
 	std::string oracleFile = (oracleDir + separator + workloadName);
 	std::string reportFile = (reportDir + separator + workloadName);
 	int status;
 
-	std::cout << "Workload file: " << workloadFile << std::endl;
-	std::cout << "Oracle file: " << oracleFile << std::endl;
+
 	std::cout << "Report file: " << reportFile << std::endl;
 
-	status = runOracle(workloadFile.c_str(), oracleFile.c_str());
+	status = runOracle(oracleDir, workloadFile, oracleFile);
 	if (status != 0) {
 		std::cout << "Oracle Failed!" << std::endl;
 		return -1;
 	}
 
-	status = runCrasher(workloadFile.c_str());
+	status = runCrasher(crashDir, workloadFile);
 	if (status != 0) {
 		std::cout << "Crasher failed!" << std::endl;
 		return -1;
 	}
 	
-	status = runChecker(oracleFile.c_str(), reportFile.c_str());
+	status = runChecker(oracleFile, crashDir, reportFile);
 	if (status != 0) {
 		std::cout << "Checker failed!" << std::endl;
 		return -1;
@@ -87,7 +96,35 @@ int runTest(std::string workloadDir, std::string oracleDir, std::string reportDi
 	return 0;
 }
 
-int runOracle(const char* workloadFile, const char* oracleFile) {
+int createTestDirectories(std::string oracleDir, std::string crashDir) {
+
+#ifdef MLFS
+	init_fs();
+#endif
+
+	std::cout << "Making oracle directory: " << oracleDir << std::endl;
+	int err = mkdir(oracleDir.c_str(), 0777);
+	if (err != 0) {
+		perror("Failed to make oracleDir");
+		return err;
+	}
+
+	std::cout << "Making crash directory: " << crashDir << std::endl;
+	err = mkdir(crashDir.c_str(), 0777);
+	if (err != 0) {
+		perror("Failed to make crashDir");
+		return err;
+	}
+
+#ifdef MLFS
+	shutdown_fs();
+#endif
+
+	return 0;
+}
+
+int runOracle(std::string oracleDir, std::string workloadFile, std::string oracleFile) {
+	std::cout << "Running oracle in directory " << oracleDir << " with workload " << workloadFile << " and oracleFile: " << oracleFile << std::endl;
 	pid_t cpid = fork();
 	if (cpid == -1) {
 		perror("Failed to fork oracle");
@@ -95,62 +132,69 @@ int runOracle(const char* workloadFile, const char* oracleFile) {
 	}
 	if (cpid == 0) {
 		// Child process
-		execl(ORACLE_EXE_PATH, "strata_read_ace_workload", workloadFile, "/mlfs/oracle2", "oracle", oracleFile, NULL);
+		execl(ORACLE_EXE_PATH, "strata_read_ace_workload", workloadFile.c_str(), oracleDir.c_str(), "oracle", oracleFile.c_str(), NULL);
 		perror("Failed to exec oracle");
 		exit(EXIT_FAILURE);
 	} 
 
+	std::cout << "Waiting on oracle" << std::endl;
 	int status;
 	pid_t wpid = waitpid(cpid, &status, 0);
 	if (wpid == -1) {
 		perror("Failed to wait on oracle");
 		return -1;
 	}
-	std::cout << "Finished waiting on oracle" << std::endl;
+
+	std::cout << "Finished waiting for oracle; got status: " << WEXITSTATUS(status) << std::endl;
 	return WEXITSTATUS(status);
 }
 
-int runCrasher(const char* workloadFile) {
+int runCrasher(std::string crashDir, std::string workloadFile) {
+	std::cout << "Running crasher in directory " << crashDir << " with workload " << workloadFile << std::endl;
 	pid_t cpid = fork();
 	if (cpid == -1) {
 		perror("Failed to fork crasher");
 		return -1;
 	}
 	if (cpid == 0) {
-		execl(CRASH_EXE_PATH, "strata_read_ace_workload", workloadFile, "/mlfs/crash2", "crash", "false", NULL);
+		execl(CRASH_EXE_PATH, "strata_read_ace_workload", workloadFile, crashDir.c_str(), "crash", "false", NULL);
 		perror("Failed to exec crasher");
 		exit(EXIT_FAILURE);
 	}
 
-	std::cout << "WAITING ON CRASHER" << std::endl;
+	std::cout << "Waiting on crasher" << std::endl;
 	int status = 0;
 	pid_t wpid = wait(NULL);
 	if (wpid == -1) {
 		perror("Failed to wait on crasher");
 		return -1;
 	}
-	std::cout << "Finished waiting on crasher" << std::endl;
+
+	std::cout << "Finished waiting on crasher; got status " << WEXITSTATUS(status) << std::endl;
 	return WEXITSTATUS(status);
 }
 
-int runChecker(const char* oracleFile, const char* reportFile) {
+int runChecker(std::string oracleFile, std::string crashDir, std::string reportFile) {
+	std::cout << "Running checker in directory " << crashDir << " with oracleFile " << oracleFile << " and reportFile " << reportFile << std::endl;
 	pid_t cpid = fork();
 	if (cpid == -1) {
 		perror("Failed to fork checker");
 		return -1;
 	}
 	if (cpid == 0) {
-		execl(CHECKER_EXE_PATH, "oracle_checker", oracleFile, "/mlfs/crash2", reportFile, NULL);
+		execl(CHECKER_EXE_PATH, "oracle_checker", oracleFile.c_str(), crashDir.c_str(), reportFile.c_str(), NULL);
 		perror("Failed to exec checker");
 		exit(EXIT_FAILURE);
 	}
 
+	std::cout << "Waiting on checker" << std::endl;
 	int status;
 	pid_t wpid = waitpid(cpid, &status, 0);
 	if (wpid == -1) {
-		perror("Failed to wait on crasher");
+		perror("Failed to wait on checker");
 		return -1;
 	}
-	std::cout << "Finished waiting on checker" << std::endl;
+
+	std::cout << "Finished waiting on checker; got status " << WEXITSTATUS(status) << std::endl;
 	return WEXITSTATUS(status);
 }

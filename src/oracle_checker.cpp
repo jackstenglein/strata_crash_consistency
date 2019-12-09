@@ -43,17 +43,11 @@ int main(int argc, char** argv) {
     if (oracleSnapshot == currentSnapshot) {
         std::cout << "TEST PASSED" << std::endl;
         result = 0;
-        reportFailure(oracleSnapshot, currentSnapshot, outputFile);
+        reportSuccess(oracleSnapshot, currentSnapshot, outputFile);
     } else {
         std::cout << "TEST FAILED" << std::endl;
         result = 1;
-	reportFailure(oracleSnapshot, currentSnapshot, outputFile);
-    }
-
-    //reset(fsDir);
-    int err = remove("/mlfs/test4/oof");
-    if (err != 0) {
-	    std::cout << "Remove error: " << err << std::endl;
+	    reportFailure(oracleSnapshot, currentSnapshot, outputFile);
     }
 
 #ifdef MLFS
@@ -90,7 +84,23 @@ const std::vector<std::string> getAllFilePaths(std::string fsDir) {
 
 void reportFailure(FSSnapshot& oracleSnapshot, FSSnapshot& currentSnapshot, std::string outputFile) {
     std::ofstream out;
-    out.open(outputFile, std::ios::out|std::ios::trunc);
+    std::string fileName = outputFile + "-FAIL";
+    out.open(fileName, std::ios::out|std::ios::trunc);
+    if ( ! out.is_open()) {
+        std::cout << "Failed to open report file" << std::endl;
+        return;
+    }
+    out << "ORACLE SNAPSHOT\n";
+    oracleSnapshot.printState(out);
+    out << "\nCURRENT SNAPSHOT\n";
+    currentSnapshot.printState(out);
+    out.close(); 
+}
+
+void reportSuccess(FSSnapshot& oracleSnapshot, FSSnapshot& currentSnapshot, std::string outputFile) {
+    std::ofstream out;
+    std::string fileName = outputFile + "-pass";
+    out.open(fileName, std::ios::out|std::ios::trunc);
     if ( ! out.is_open()) {
         std::cout << "Failed to open report file" << std::endl;
         return;
