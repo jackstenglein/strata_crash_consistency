@@ -47,6 +47,8 @@ int main(int argc, char** argv) {
         reportFailure(oracleSnapshot, currentSnapshot, outputFile);
     }
 
+    reset(fsDir);
+
 #ifdef MLFS
     shutdown_fs();
 #endif

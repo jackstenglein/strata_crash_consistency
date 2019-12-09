@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    std::cout << "strata_read_ace_workload " << workloadFile << " " << testDir << " " << testMode << std::endl; 
+    std::cout << "strata_read_ace_workload " << workloadFile << " " << testDir << " " << testMode << " " << finalArg << std::endl; 
 
 #ifdef MLFS
     std::cout << "Initializing strata" << std::endl;
