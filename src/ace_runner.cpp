@@ -248,7 +248,7 @@ int OracleAceRunner::handle_checkpoint(std::vector<std::string>& tokens) {
 CrashAceRunner::CrashAceRunner(std::string testDir) : AbstractAceRunner(testDir) {}
 
 // Gets strata's pid to kill it
-pid_t get_pid() {
+pid_t get_strata_pid() {
     char buf[512];
     FILE *cmd_pipe = popen("pidof -s kernfs", "r");
     fgets(buf, 512, cmd_pipe);
@@ -261,12 +261,12 @@ int CrashAceRunner::handle_checkpoint(std::vector<std::string>& tokens) {
     std::cout << "Checkpoint, crashing from CrashAceRunner." << std::endl;
     
     // Kill strata
-    pid_t pid = get_pid();
-    if (kill(pid, SIGKILL)) {
+    pid_t pid = get_strata_pid();
+    if (pid > 0 && kill(pid, SIGKILL)) {
         perror("Failed to kill kernfs (strata)");
     }
     
     // Kill ourselves
-    raise(SIGKILL);
-	return 1;
+    _exit(0);
+    return 1;
 }

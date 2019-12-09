@@ -113,6 +113,13 @@ FSSnapshot::FSSnapshot(std::string filename) {
 // Compares two FSSnapshot objects. They are equal if they have the same FileSnapshot
 // objects.
 bool FSSnapshot::operator==(const FSSnapshot other) const {
+    if (snapshots.size != other.snapshots.size()) {
+	return false;
+    }
+    
+    for (auto it = snapshots.cbegin(); it != snapshots.cend(); ++it) {
+	    std::string fileName = 
+	
 	return snapshots == other.snapshots;
 }
 

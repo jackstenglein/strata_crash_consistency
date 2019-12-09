@@ -52,24 +52,28 @@ void runTest(std::string workloadDir, std::string oracleDir, std::string reportD
 	std::cout << "Testing " << workloadName << std::endl;
 
 	std::string separator("/");
-	const char* workloadFile = (workloadDir + separator + workloadName).c_str();
-	const char* oracleFile = (oracleDir + separator + workloadName).c_str();
-	const char* reportFile = (reportDir + separator + workloadName).c_str();
+	std::string workloadFile = (workloadDir + separator + workloadName);
+	std::string oracleFile = (oracleDir + separator + workloadName);
+	std::string reportFile = (reportDir + separator + workloadName);
 	int status;
 
-	status = runOracle(workloadFile, oracleFile);
+	std::cout << "Workload file: " << workloadFile << std::endl;
+	std::cout << "Oracle file: " << oracleFile << std::endl;
+	std::cout << "Report file: " << reportFile << std::endl;
+
+	status = runOracle(workloadFile.c_str(), oracleFile.c_str());
 	if (status < 0) {
 		std::cout << "Oracle Failed!" << std::endl;
 		return;
 	}
 
-	status = runCrasher(workloadFile);
+	status = runCrasher(workloadFile.c_str());
 	if (status < 0) {
 		std::cout << "Crasher failed!" << std::endl;
 		return;
 	}
 	
-	status = runChecker(oracleFile, reportFile);
+	status = runChecker(oracleFile.c_str(), reportFile.c_str());
 	if (status < 0) {
 		std::cout << "Checker failed!" << std::endl;
 		return;
@@ -95,6 +99,7 @@ int runOracle(const char* workloadFile, const char* oracleFile) {
 		perror("Failed to wait on oracle");
 		return -1;
 	}
+	std::cout << "Finished waiting on oracle" << std::endl;
 	return status;
 }
 
@@ -110,12 +115,14 @@ int runCrasher(const char* workloadFile) {
 		exit(EXIT_FAILURE);
 	}
 
-	int status;
-	pid_t wpid = waitpid(cpid, &status, 0);
+	std::cout << "WAITING ON CRASHER" << std::endl;
+	int status = 0;
+	pid_t wpid = wait(NULL);
 	if (wpid == -1) {
 		perror("Failed to wait on crasher");
 		return -1;
 	}
+	std::cout << "Finished waiting on crasher" << std::endl;
 	return status;
 }
 
@@ -137,5 +144,6 @@ int runChecker(const char* oracleFile, const char* reportFile) {
 		perror("Failed to wait on crasher");
 		return -1;
 	}
+	std::cout << "Finished waiting on checker" << std::endl;
 	return status;
 }

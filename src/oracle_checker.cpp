@@ -30,6 +30,8 @@ int main(int argc, char** argv) {
     std::string fsDir(argv[FS_DIR_INDEX]);
     std::string outputFile(argv[OUTPUT_FILE_INDEX]);
 
+    std::cout << "oracle_checker " << oracleFile << " " << fsDir << " " << outputFile << std::endl;
+
 #ifdef MLFS
     init_fs();
 #endif
@@ -78,7 +80,7 @@ void reportFailure(FSSnapshot& oracleSnapshot, FSSnapshot& currentSnapshot, std:
     std::ofstream out;
     out.open(outputFile, std::ios::out|std::ios::trunc);
     if ( ! out.is_open()) {
-        std::cout << "Failed to open output file" << std::endl;
+        std::cout << "Failed to open report file" << std::endl;
         return;
     }
     out << "ORACLE SNAPSHOT\n";
