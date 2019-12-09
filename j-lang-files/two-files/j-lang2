@@ -20,6 +20,7 @@ local_checkpoint
 
 # run
 open oof O_RDWR|O_CREAT 0777
+write oof 0 1024
 fsync oof
 checkpoint 1
 close oof
