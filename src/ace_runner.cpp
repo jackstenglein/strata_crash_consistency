@@ -86,6 +86,7 @@ int AbstractAceRunner::handle_action(std::vector<std::string>& tokens) {
 }
 
 int AbstractAceRunner::handle_close(std::vector<std::string>& tokens) {
+    std::cout << "Close " << getFilePath(tokens[1]) << ", " << fileDescriptors[getFilePath(tokens[1])] << std::endl;
     int fd = fileDescriptors[getFilePath(tokens[1])];            
     return close(fd);
 }
@@ -110,8 +111,9 @@ int AbstractAceRunner::handle_fdatasync(std::vector<std::string>& tokens) {
 
 int AbstractAceRunner::handle_fsync(std::vector<std::string>& tokens) {
     if (tokens[1] == "test") {
-	return fsync(test_fd);
+	    return fsync(test_fd);
     } else {
+        std::cout << "Fsync: " << tokens[1] << ", " << fileDescriptors[getFilePath(tokens[1])] << std::endl;
         return fsync(fileDescriptors[getFilePath(tokens[1])]);
     }
 }
@@ -133,7 +135,9 @@ int AbstractAceRunner::handle_open(std::vector<std::string>& tokens) {
     const int flags = parse_open_flags(tokens[flag_index]);
     const int permissions = std::stoi(tokens[perm_index], nullptr, 8);
 
+    std::cout << "File path: " << file_path << ", flags: " << flags << ", permissions: " << permissions << std::endl;
     int fd = open(file_path.c_str(), flags, permissions);
+    std::cout << "File path: " << file_path << "fd: " << fd << std::endl;
 
     if (fd > 0) {
         fileDescriptors[file_path] = fd;
@@ -175,11 +179,11 @@ int AbstractAceRunner::handle_unlink(std::vector<std::string>& tokens) {
 }
 
 int AbstractAceRunner::handle_write(std::vector<std::string>& tokens) {
-    const int perm_index = 3;
     std::string file_path = getFilePath(tokens[1]);
     int fd = fileDescriptors[file_path];
     int count = stoi(tokens[3]);
     std::string s(count, '0');
+    printf("File path: %s, fd: %d, count: %d\n", file_path.c_str(), fd, count);
     return write(fd, s.c_str(), count);
 }
 
