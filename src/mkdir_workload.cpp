@@ -16,11 +16,9 @@ int main() {
 	#ifdef MLFS
 		init_fs();
 	#endif
+
+	mkdir("/mlfs/test2", 0777);
 	
-	struct stat result;
-	stat("/mlfs/oracle2/oof", &result);
-	std::cout << "Stats: " << std::endl;
-	printStats(&result);
 
 #ifdef MLFS
 	shutdown_fs();

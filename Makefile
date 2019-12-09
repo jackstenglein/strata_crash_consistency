@@ -53,5 +53,8 @@ testFile: src/test_workload.cpp
 testOof: src/read_foo_fstats.cpp
 	$(CXX) -std=c++11 -g -Ofast -o $@ $^ -I$(INCLUDES) -L$(LIBFS_DIR) -lmlfs -DMLFS $(CFLAGS) $(LDFLAGS)
 
+testMkdir: src/mkdir_workload.cpp
+	$(CXX) -std=c++11 -g -Ofast -o $@ $^ -I$(INCLUDES) -L$(LIBFS_DIR) -lmlfs -DMLFS $(CFLAGS) $(LDFLAGS)
+
 clean:
 	rm -rf $(BUILD_DIR)/*o $(BUILD_DIR)/$(RUNNER_EXE)

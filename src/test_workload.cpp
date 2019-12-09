@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <iostream>
 
-void printState(struct stat*);
+void printStats(struct stat*);
 
 int main() {
 	#ifdef MLFS
