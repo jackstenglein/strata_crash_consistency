@@ -38,8 +38,8 @@ int main(int argc, char** argv) {
 #endif
 
     int result;
-    FSSnapshot oracleSnapshot(oracleFile);
-    FSSnapshot currentSnapshot("oracle/testOracle");
+    FSSnapshot oracleSnapshot("/mlfs/oracle2", getAllFilePaths("/mlfs/oracle2"));
+    FSSnapshot currentSnapshot(fsDir, getAllFilePaths(fsDir));
     if (oracleSnapshot == currentSnapshot) {
         std::cout << "TEST PASSED" << std::endl;
         result = 0;

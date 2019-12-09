@@ -117,7 +117,7 @@ int runCrasher(const char* workloadFile) {
 		return -1;
 	}
 	if (cpid == 0) {
-		execl(CRASH_EXE_PATH, "strata_read_ace_workload", workloadFile, "/mlfs/crash2", "oracle", "oracle/testOracle", NULL);
+		execl(CRASH_EXE_PATH, "strata_read_ace_workload", workloadFile, "/mlfs/crash2", "crash", "false", NULL);
 		perror("Failed to exec crasher");
 		exit(EXIT_FAILURE);
 	}
