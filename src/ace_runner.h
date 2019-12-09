@@ -1,6 +1,5 @@
 #include <vector>
 #include <map>
-#include <set>
 
 
 class AbstractAceRunner {
@@ -29,7 +28,7 @@ class AbstractAceRunner {
 		int parse_falloc_flags(std::string flags);
 		int parse_open_flags(std::string flags);
 	protected:
-		const std::set<std::string> getAllFilePaths(void);
+		const std::vector<std::string> getAllFilePaths(void);
 		std::string testDir;
 	public:
 	  	AbstractAceRunner(std::string testDir);

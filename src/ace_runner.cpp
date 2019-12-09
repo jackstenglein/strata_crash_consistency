@@ -159,7 +159,7 @@ int AbstractAceRunner::handle_rename(std::vector<std::string>& tokens) {
 }
 
 int AbstractAceRunner::handle_sync(std::vector<std::string>& tokens) {
-    sync();
+    //sync();
     return 1;
 }
 
@@ -228,10 +228,12 @@ int AbstractAceRunner::parse_open_flags(std::string flags) {
 void AbstractAceRunner::reset(void) {
     std::cout << "RESET CALLED" << std::endl;
     //std::cout << paths_added.size() << std::endl;
-    std::set<std::string> filePaths = getAllFilePaths();
+    std::vector<std::string> filePaths = getAllFilePaths();
     for (std::string file : filePaths) {
         //if (file != "/mlfs/A") {
-	    remove(file.c_str());
+	    if (remove(file.c_str())) {
+		    perror("Failed to remove");
+	    }
 	//}
     }
 }

@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-const std::vector<std::string> AbstractAceRunner::getAllFilePaths(void) {
+const std::vector<std::string> getAllFilePaths(std::string testDir) {
     std::vector<std::string> paths;
     paths.push_back(testDir + "/A/C/oof");
     paths.push_back(testDir + "/A/C/bar");
