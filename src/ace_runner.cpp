@@ -225,8 +225,8 @@ int AbstractAceRunner::parse_open_flags(std::string flags) {
     return result;
 }
 
-virtual void AbstractAceRunner::reset(void) {
-    std::cout << "RESET CALLED" << std::endl;
+void AbstractAceRunner::reset(void) {
+    std::cout << "Resetting oracle directory" << std::endl;
     //std::cout << paths_added.size() << std::endl;
     std::vector<std::string> filePaths = getAllFilePaths();
     for (std::string file : filePaths) {
@@ -287,6 +287,6 @@ int CrashAceRunner::handle_checkpoint(std::vector<std::string>& tokens) {
     return 1;
 }
 
-virtual void CrashAceRunner::reset(void) {
+void CrashAceRunner::reset(void) {
     std::cout << "Reset in CrashAceRunner is no-op" << std::endl;
 }
