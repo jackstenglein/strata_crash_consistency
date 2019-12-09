@@ -65,8 +65,8 @@ int runTest(std::string workloadDir, std::string workloadName) {
 	std::cout << "Testing " << workloadName << std::endl;
 
 	std::string separator("/");
-	std::string oracleDir = ("/mlfs/oracle-" + workloadName);
-	std::string crashDir = ("/mlfs/crash-" + workloadName);
+	std::string oracleDir = ("test/oracle-" + workloadName);
+	std::string crashDir = ("test/crash-" + workloadName);
 	std::string workloadFile = (workloadDir + separator + workloadName);
 	std::string oracleFile = ("oracle/" + workloadName);
 	std::string reportFile = ("report/" + workloadName);
@@ -153,7 +153,7 @@ int runCrasher(std::string crashDir, std::string workloadFile) {
 		return -1;
 	}
 	if (cpid == 0) {
-		execl(CRASH_EXE_PATH, "strata_read_ace_workload", workloadFile, crashDir.c_str(), "crash", "false", NULL);
+		execl(CRASH_EXE_PATH, "strata_read_ace_workload", workloadFile.c_str(), crashDir.c_str(), "crash", "false", NULL);
 		perror("Failed to exec crasher");
 		exit(EXIT_FAILURE);
 	}
