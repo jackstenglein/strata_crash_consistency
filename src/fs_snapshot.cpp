@@ -84,7 +84,7 @@ void FileSnapshot::writeToFile(std::ofstream& out) const {
 
 // Takes a map of filepaths to file descriptors and creates a snapshot of the 
 // files in the map.
-FSSnapshot::FSSnapshot(std::string _mountDir, const std::set<std::string>& paths) {
+FSSnapshot::FSSnapshot(std::string _mountDir, const std::vector<std::string>& paths) {
 	mountDir = _mountDir;
 	for (auto it = paths.cbegin(); it != paths.cend(); ++it) {
 		FileSnapshot* snapshot = new FileSnapshot(*it);

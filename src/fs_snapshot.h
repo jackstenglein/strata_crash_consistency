@@ -2,7 +2,7 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <map>
-#include <set>
+#include <vector>
 
 // Represents a snapshot of single file.
 class FileSnapshot {
@@ -23,7 +23,7 @@ class FSSnapshot {
 	std::map<std::string, FileSnapshot> snapshots;
 	std::string mountDir;
   public:
-    FSSnapshot(std::string, const std::set<std::string>&);
+    FSSnapshot(std::string, const std::vector<std::string>&);
 	FSSnapshot(std::string filename);
 	bool operator==(const FSSnapshot other) const;
 	void printState(std::ostream&) const;

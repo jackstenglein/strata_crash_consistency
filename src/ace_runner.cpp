@@ -32,24 +32,24 @@ AbstractAceRunner::AbstractAceRunner(std::string testDirectory) {
 }
 
 
-const std::set<std::string> AbstractAceRunner::getAllFilePaths(void) {
-    std::set<std::string> paths;
-    paths.insert(testDir + "/A/C/oof");
-    paths.insert(testDir + "/A/C/bar");
-    paths.insert(testDir + "/A/oof");
-    paths.insert(testDir + "/A/foo");
-    paths.insert(testDir + "/D/oof");
-    paths.insert(testDir + "/A/bar");
-    paths.insert(testDir + "/D/bar");
-    paths.insert(testDir + "/oof");
-    paths.insert(testDir + "/bar");
-    paths.insert(testDir + "/A/C");
-    paths.insert(testDir + "/A");
-    paths.insert(testDir + "/D");
-    paths.insert(testDir + "/B/foo");
-    paths.insert(testDir + "/B/bar");
-    paths.insert(testDir + "/B");
-    paths.insert(testDir + "/foo");
+const std::vector<std::string> AbstractAceRunner::getAllFilePaths(void) {
+    std::vector<std::string> paths;
+    paths.push_back(testDir + "/A/C/oof");
+    paths.push_back(testDir + "/A/C/bar");
+    paths.push_back(testDir + "/A/oof");
+    paths.push_back(testDir + "/A/foo");
+    paths.push_back(testDir + "/D/oof");
+    paths.push_back(testDir + "/A/bar");
+    paths.push_back(testDir + "/D/bar");
+    paths.push_back(testDir + "/oof");
+    paths.push_back(testDir + "/bar");
+    paths.push_back(testDir + "/A/C");
+    paths.push_back(testDir + "/A");
+    paths.push_back(testDir + "/D");
+    paths.push_back(testDir + "/B/foo");
+    paths.push_back(testDir + "/B/bar");
+    paths.push_back(testDir + "/B");
+    paths.push_back(testDir + "/foo");
     return paths;
 }
 
