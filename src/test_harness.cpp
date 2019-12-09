@@ -20,25 +20,25 @@
 #define ORACLE_DIR_INDEX 2
 #define REPORT_DIR_INDEX 3
 
-int runTest(std::string, std::string, std::string, std::string);
+int runTest(std::string, std::string);
 int createTestDirectories(std::string, std::string);
 int runOracle(std::string, std::string, std::string);
 int runCrasher(std::string, std::string);
-int runChecker(const char*, const char*);
+int runChecker(std::string, std::string, std::string);
 
 /*
-	Usage: ./test_harness WORKLOAD_DIR ORACLE_DIR REPORT_DIR
+	Usage: ./test_harness WORKLOAD_DIR
+
+	Generate oracle files are written to ./oracle and report files are written to ./report
 */ 
 int main(int argc, char** argv) {
 
-	if (argc < 4) {
-		std::cout << "Usage: ./test_harness WORKLOAD_DIR ORACLE_DIR REPORT_DIR" << std::endl;
+	if (argc < 2) {
+		std::cout << "Usage: ./test_harness WORKLOAD_DIR" << std::endl;
 		return -1;
 	}
 
 	std::string workloadDir(argv[WORKLOAD_DIR_INDEX]);
-	std::string oracleDir(argv[ORACLE_DIR_INDEX]);
-	std::string reportDir(argv[REPORT_DIR_INDEX]);
 
 	// Read all files in workload directory
 	int err;
@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
         while ((entry = readdir(dp))) {
 			std::string workloadName(entry->d_name);
 			if (workloadName != "." && workloadName != "..") {
-				err = runTest(workloadDir, oracleDir, reportDir, workloadName);
+				err = runTest(workloadDir, workloadName);
 				if (err) {
 					std::cout << "Aborting remaining tests" << std::endl;
 					return -1;
@@ -61,21 +61,17 @@ int main(int argc, char** argv) {
     closedir(dp);
 }
 
-int runTest(std::string workloadDir, std::string oracleDir, std::string reportDir, std::string workloadName) {
+int runTest(std::string workloadDir, std::string workloadName) {
 	std::cout << "Testing " << workloadName << std::endl;
 
 	std::string separator("/");
 	std::string oracleDir = ("/mlfs/oracle-" + workloadName);
 	std::string crashDir = ("/mlfs/crash-" + workloadName);
 	std::string workloadFile = (workloadDir + separator + workloadName);
-	std::string oracleFile = (oracleDir + separator + workloadName);
-	std::string reportFile = (reportDir + separator + workloadName);
-	int status;
+	std::string oracleFile = ("oracle/" + workloadName);
+	std::string reportFile = ("report/" + workloadName);
 
-
-	std::cout << "Report file: " << reportFile << std::endl;
-
-	status = runOracle(oracleDir, workloadFile, oracleFile);
+	int status = runOracle(oracleDir, workloadFile, oracleFile);
 	if (status != 0) {
 		std::cout << "Oracle Failed!" << std::endl;
 		return -1;
