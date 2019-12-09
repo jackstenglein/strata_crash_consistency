@@ -65,8 +65,8 @@ int runTest(std::string workloadDir, std::string workloadName) {
 	std::cout << "Testing " << workloadName << std::endl;
 
 	std::string separator("/");
-	std::string oracleDir = ("test/oracle-" + workloadName);
-	std::string crashDir = ("test/crash-" + workloadName);
+	std::string oracleDir = ("/mlfs/oracle-" + workloadName + "-nocrash");
+	std::string crashDir = ("/mlfs/crash-" + workloadName + "-nocrash");
 	std::string workloadFile = (workloadDir + separator + workloadName);
 	std::string oracleFile = ("oracle/" + workloadName);
 	std::string reportFile = ("report/" + workloadName);

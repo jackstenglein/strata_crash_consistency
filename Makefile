@@ -33,7 +33,7 @@ runner: $(BUILD_DIR)/$(RUNNER_EXE)
 checker: $(BUILD_DIR)/$(CHECKER_EXE)
 
 harness: $(SOURCE_DIR)/test_harness.cpp
-	$(CXX) -std=c++11 -o $(BUILD_DIR)/test_harness $^
+	$(CXX) -std=c++11 -g -Ofast -o $(BUILD_DIR)/test_harness $^ -I$(INCLUDES) -L$(LIBFS_DIR) -lmlfs -DMLFS $(CFLAGS) $(LDFLAGS)
 
 dir:
 	mkdir -p $(BUILD_DIR)
