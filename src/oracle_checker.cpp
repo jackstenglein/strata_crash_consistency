@@ -60,19 +60,24 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-const std::set<std::string> getAllFilePaths(std::string fsDir) {
+const std::set<std::string> getAllFilePaths(std::string testDir) {
     std::set<std::string> paths;
-    paths.insert(fsDir + "/A/C/oof");
-    paths.insert(fsDir + "/A/C/bar");
-    paths.insert(fsDir + "/A/oof");
-    paths.insert(fsDir + "/D/oof");
-    paths.insert(fsDir + "/A/bar");
-    paths.insert(fsDir + "/D/bar");
-    paths.insert(fsDir + "/oof");
-    paths.insert(fsDir + "/bar");
-    paths.insert(fsDir + "/A/C");
-    paths.insert(fsDir + "/A");
-    paths.insert(fsDir + "/D");
+    paths.insert(testDir + "/A/C/oof");
+    paths.insert(testDir + "/A/C/bar");
+    paths.insert(testDir + "/A/oof");
+    paths.insert(testDir + "/A/foo");
+    paths.insert(testDir + "/D/oof");
+    paths.insert(testDir + "/A/bar");
+    paths.insert(testDir + "/D/bar");
+    paths.insert(testDir + "/oof");
+    paths.insert(testDir + "/bar");
+    paths.insert(testDir + "/A/C");
+    paths.insert(testDir + "/A");
+    paths.insert(testDir + "/D");
+    paths.insert(testDir + "/B/foo");
+    paths.insert(testDir + "/B/bar");
+    paths.insert(testDir + "/B");
+    paths.insert(testDir + "/foo");
     return paths;
 }
 

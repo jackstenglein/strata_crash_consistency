@@ -37,6 +37,7 @@ const std::set<std::string> AbstractAceRunner::getAllFilePaths(void) {
     paths.insert(testDir + "/A/C/oof");
     paths.insert(testDir + "/A/C/bar");
     paths.insert(testDir + "/A/oof");
+    paths.insert(testDir + "/A/foo");
     paths.insert(testDir + "/D/oof");
     paths.insert(testDir + "/A/bar");
     paths.insert(testDir + "/D/bar");
@@ -45,9 +46,10 @@ const std::set<std::string> AbstractAceRunner::getAllFilePaths(void) {
     paths.insert(testDir + "/A/C");
     paths.insert(testDir + "/A");
     paths.insert(testDir + "/D");
-    //paths.insert(testDir + "/B");
-    //paths.insert(testDir + "/B/foo");
-    //paths.insert(testDir + "/foo");
+    paths.insert(testDir + "/B/foo");
+    paths.insert(testDir + "/B/bar");
+    paths.insert(testDir + "/B");
+    paths.insert(testDir + "/foo");
     return paths;
 }
 
@@ -65,9 +67,11 @@ std::string AbstractAceRunner::getFilePath(std::string file) {
     if (file == "AC") return (testDir + "/A/C");
     if (file == "D") return (testDir + "/D");
     if (file == "test") return testDir;
-    //if (file == "B") return (testDir + "/B");
-    //if (file == "Bfoo") return (testDir + "/B/foo");
-    //if (file == "foo") return (testDir + "/foo");
+    if (file == "B") return (testDir + "/B");
+    if (file == "Bfoo") return (testDir + "/B/foo");
+    if (file == "foo") return (testDir + "/foo");
+    if (file == "Afoo") return (testDir + "/A/foo");
+    if (file == "Bbar") return (testDir + "/B/bar");
     return nullptr;
 }
 
@@ -93,7 +97,7 @@ int AbstractAceRunner::handle_falloc(std::vector<std::string>& tokens) {
     const int length_index = 4;
 
     const int fd = fileDescriptors[getFilePath(tokens[filenameIndex])];
-    const int flags = parse_falloc_flags(tokens[flagIndex]);
+    const int flags = 0;//parse_falloc_flags(tokens[flagIndex]);
     const int offset = std::stoi(tokens[offset_index], nullptr, 10);
     const int length = std::stoi(tokens[length_index], nullptr, 10);
 
