@@ -225,14 +225,14 @@ int AbstractAceRunner::parse_open_flags(std::string flags) {
     return result;
 }
 
-void AbstractAceRunner::reset(void) {
+virtual void AbstractAceRunner::reset(void) {
     std::cout << "RESET CALLED" << std::endl;
     //std::cout << paths_added.size() << std::endl;
     std::vector<std::string> filePaths = getAllFilePaths();
     for (std::string file : filePaths) {
         //if (file != "/mlfs/A") {
 	    if (remove(file.c_str())) {
-		    perror("Failed to remove");
+		    // perror("Failed to remove");
 	    }
 	//}
     }
@@ -246,12 +246,18 @@ int OracleAceRunner::handle_checkpoint(std::vector<std::string>& tokens) {
     std::cout << "Checkpoint, saving file state." << std::endl;
     // Crash happens
     FSSnapshot snapshot(testDir, getAllFilePaths());
-    snapshot.printState(std::cout);
+    // snapshot.printState(std::cout);
     snapshot.writeToFile(outputFile);
     return 1;
 }
 
-CrashAceRunner::CrashAceRunner(std::string testDir) : AbstractAceRunner(testDir) {}
+CrashAceRunner::CrashAceRunner(std::string testDir, std::string crash) : AbstractAceRunner(testDir) {
+    if (crash == "false") {
+        shouldCrash = false;
+    } else {
+        shouldCrash = true;
+    }
+}
 
 // Gets strata's pid to kill it
 pid_t get_strata_pid() {
@@ -264,15 +270,23 @@ pid_t get_strata_pid() {
 }
 
 int CrashAceRunner::handle_checkpoint(std::vector<std::string>& tokens) {
-    std::cout << "Checkpoint, crashing from CrashAceRunner." << std::endl;
+    if (shouldCrash) {
+        std::cout << "Checkpoint, crashing from CrashAceRunner." << std::endl;
     
-    // Kill strata
-    pid_t pid = get_strata_pid();
-    if (pid > 0 && kill(pid, SIGKILL)) {
-        perror("Failed to kill kernfs (strata)");
+        // Kill strata
+        pid_t pid = get_strata_pid();
+        if (pid > 0 && kill(pid, SIGKILL)) {
+            perror("Failed to kill kernfs (strata)");
+        }
+    
+        // Kill ourselves
+        _exit(0);
     }
     
-    // Kill ourselves
-    _exit(0);
+    std::cout << "shouldCrash is false, ignoring checkpoint" << std::endl;
     return 1;
+}
+
+virtual void CrashAceRunner::reset(void) {
+    std::cout << "Reset in CrashAceRunner is no-op" << std::endl;
 }

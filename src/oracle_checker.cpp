@@ -11,6 +11,7 @@
 
 const std::vector<std::string> getAllFilePaths(std::string);
 void reportFailure(FSSnapshot&, FSSnapshot&, std::string);
+void reset(std::string fsDir);
 
 /* 
   Checks the current state of the file system against the given oracle file.
@@ -36,18 +37,11 @@ int main(int argc, char** argv) {
     init_fs();
 #endif
 
-#ifdef MLFS
-    shutdown_fs();
-#endif
-    
-#ifdef MLFS
-    init_fs();
-#endif
     FSSnapshot oracleSnapshot(oracleFile);
     FSSnapshot currentSnapshot(fsDir, getAllFilePaths(fsDir));
     if (oracleSnapshot == currentSnapshot) {
         std::cout << "TEST PASSED" << std::endl;
-        reportFailure(oracleSnapshot, currentSnapshot, outputFile);
+        // reportFailure(oracleSnapshot, currentSnapshot, outputFile);
     } else {
         std::cout << "TEST FAILED" << std::endl;
         reportFailure(oracleSnapshot, currentSnapshot, outputFile);
@@ -60,24 +54,24 @@ int main(int argc, char** argv) {
     return 0;
 }
 
-const std::vector<std::string> getAllFilePaths(std::string testDir) {
+const std::vector<std::string> getAllFilePaths(std::string fsDir) {
     std::vector<std::string> paths;
-    paths.push_back(testDir + "/A/C/oof");
-    paths.push_back(testDir + "/A/C/bar");
-    paths.push_back(testDir + "/A/oof");
-    paths.push_back(testDir + "/A/foo");
-    paths.push_back(testDir + "/D/oof");
-    paths.push_back(testDir + "/A/bar");
-    paths.push_back(testDir + "/D/bar");
-    paths.push_back(testDir + "/oof");
-    paths.push_back(testDir + "/bar");
-    paths.push_back(testDir + "/A/C");
-    paths.push_back(testDir + "/A");
-    paths.push_back(testDir + "/D");
-    paths.push_back(testDir + "/B/foo");
-    paths.push_back(testDir + "/B/bar");
-    paths.push_back(testDir + "/B");
-    paths.push_back(testDir + "/foo");
+    paths.push_back(fsDir + "/A/C/oof");
+    paths.push_back(fsDir + "/A/C/bar");
+    paths.push_back(fsDir + "/A/oof");
+    paths.push_back(fsDir + "/A/foo");
+    paths.push_back(fsDir + "/D/oof");
+    paths.push_back(fsDir + "/A/bar");
+    paths.push_back(fsDir + "/D/bar");
+    paths.push_back(fsDir + "/oof");
+    paths.push_back(fsDir + "/bar");
+    paths.push_back(fsDir + "/A/C");
+    paths.push_back(fsDir + "/A");
+    paths.push_back(fsDir + "/D");
+    paths.push_back(fsDir + "/B/foo");
+    paths.push_back(fsDir + "/B/bar");
+    paths.push_back(fsDir + "/B");
+    paths.push_back(fsDir + "/foo");
     return paths;
 }
 
@@ -93,4 +87,12 @@ void reportFailure(FSSnapshot& oracleSnapshot, FSSnapshot& currentSnapshot, std:
     out << "\nCURRENT SNAPSHOT\n";
     currentSnapshot.printState(out);
     out.close(); 
+}
+
+void reset(std::string fsDir) {
+    std::cout << "Resetting crash directory" << std::endl;
+    std::vector<std::string> filePaths = getAllFilePaths(fsDir);
+    for (std::string file : filePaths) {
+	    remove(file.c_str());
+    }
 }

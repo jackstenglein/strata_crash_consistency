@@ -26,15 +26,14 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-#define MINIMUM_ARGUMENTS 4
-#define ORACLE_MINIMUM_ARGUMENTS 5
+#define MINIMUM_ARGUMENTS 5
 #define ORACLE_TEST_MODE "oracle"
 #define CRASH_TEST_MODE "crash"
 
 #define WORKLOAD_PATH_INDEX 1
 #define TEST_DIR_INDEX 2
 #define TEST_MODE_INDEX 3
-#define ORACLE_FILE_INDEX 4
+#define FINAL_ARG_INDEX 4
 
 std::vector<std::string> tokenize(std::string str);
 int runWorkload(std::string workloadFile, AbstractAceRunner* runner);
@@ -44,34 +43,31 @@ const std::set<std::string> getFilePaths(std::string prefix);
 
 /* 
   Runs an ACE workload with the given options.
-  Usage: ./strata_read_ace_workload WORKLOAD_PATH TEST_DIR oracle|crash <ORACLE_FILE>
+  Usage: ./strata_read_ace_workload WORKLOAD_PATH TEST_DIR oracle|crash ORACLE_FILE|true|false
     
   WORKLOAD_PATH is the path to the ACE workload file
   TEST_DIR is the directory to run the ACE workload in 
   oracle specifies running with an OracleAceRunner object
   crash specifies running with a CrashAceRunner object
   ORACLE_FILE is where the file system snapshot should be saved if running in oracle mode.
+  Specify true/false for crash mode, to indicate whether the file system should be crashed.
 */
 int main(int argc, char** argv) {    
     if (argc < MINIMUM_ARGUMENTS) {
-        std::cout << "Specify either oracle or crash mode." << std::endl;
+        std::cout << "Usage: ./strata_read_ace_workload WORKLOAD_PATH TEST_DIR oracle|crash ORACLE_FILE|true|false" << std::endl;
         return -1;
     }
 
     std::string workloadFile(argv[WORKLOAD_PATH_INDEX]);
     std::string testDir(argv[TEST_DIR_INDEX]);
     std::string testMode(argv[TEST_MODE_INDEX]);
+    std::string finalArg(argv[FINAL_ARG_INDEX]);
     AbstractAceRunner* runner = NULL;
 
     if (testMode == ORACLE_TEST_MODE) {
-        if (argc < ORACLE_MINIMUM_ARGUMENTS) {
-            std::cout << "ORACLE_DIR parameter is required to run oracle mode." << std::endl;
-            return -1;
-        }
-        std::string oracleFile(argv[ORACLE_FILE_INDEX]);
-        runner = new OracleAceRunner(testDir, oracleFile);
+        runner = new OracleAceRunner(testDir, finalArg);
     } else if (testMode == CRASH_TEST_MODE) {
-        runner = new CrashAceRunner(testDir);
+        runner = new CrashAceRunner(testDir, finalArg);
     } else {
         std::cout << "Specify either oracle or crash mode."  << std::endl;
         return -1;

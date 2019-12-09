@@ -33,7 +33,7 @@ class AbstractAceRunner {
 	public:
 	  	AbstractAceRunner(std::string testDir);
 		int handle_action(std::vector<std::string>& tokens);
-		void reset(void);
+		virtual void reset(void);
 };
 
 class OracleAceRunner : public AbstractAceRunner {
@@ -46,7 +46,9 @@ class OracleAceRunner : public AbstractAceRunner {
 
 class CrashAceRunner : public AbstractAceRunner {
 	private:
+		bool shouldCrash;
 		virtual int handle_checkpoint(std::vector<std::string>& tokens);
 	public:
-		CrashAceRunner(std::string);
+		CrashAceRunner(std::string, std::string);
+		virtual void reset(void);
 };
