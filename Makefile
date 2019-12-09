@@ -26,11 +26,14 @@ LDFLAGS = -Wl,-rpath=$(abspath $(LIBFS_DIR)) \
 		  -Wl,-rpath=$(abspath $(NVML_DIR)) \
 		  -lpthread -lrt -lm -lssl -lcrypto
 
-all: dir runner checker
+all: dir runner checker harness
 
 runner: $(BUILD_DIR)/$(RUNNER_EXE)
 
 checker: $(BUILD_DIR)/$(CHECKER_EXE)
+
+harness: $(SOURCE_DIR)/test_harness.cpp
+	$(CXX) -std=c++11 -o $(BUILD_DIR)/test_harness $^
 
 dir:
 	mkdir -p $(BUILD_DIR)

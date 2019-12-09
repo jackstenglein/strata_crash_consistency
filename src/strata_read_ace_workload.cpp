@@ -103,10 +103,11 @@ int runWorkload(std::string workloadFile, AbstractAceRunner* runner) {
 
     int result = 0;
     while (std::getline(infile, line)) {
+        std::cout << line << std::endl;
         std::istringstream iss(line);
         std::vector<std::string> tokens = tokenize(line);
         result = runner->handle_action(tokens);
-        if (result < 0 && errno != 0) {
+        if (result < 0) {
             std::cout << "FAILED workload on line: " << line << std::endl;
             perror("");
             break;
