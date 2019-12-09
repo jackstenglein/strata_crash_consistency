@@ -4,6 +4,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <string>
+#include <iostream>
 
 #define ORACLE_EXE_PATH "build/strata_read_ace_workload"
 #define CRASH_EXE_PATH "build/strata_read_ace_workload"
@@ -38,7 +39,9 @@ int main(int argc, char** argv) {
     if (dp != nullptr) {
         while ((entry = readdir(dp))) {
 			std::string workloadName(entry->d_name);
-            std::cout << "Testing " << workloadName << std::endl;
+			if (workloadName != "." && workloadName != "..") {
+				runTest(workloadDir, oracleDir, reportDir, workloadName);
+			}
 		}
     }
 
@@ -46,6 +49,7 @@ int main(int argc, char** argv) {
 }
 
 void runTest(std::string workloadDir, std::string oracleDir, std::string reportDir, std::string workloadName) {
+	std::cout << "Testing " << workloadName << std::endl;
 
 	std::string separator("/");
 	const char* workloadFile = (workloadDir + separator + workloadName).c_str();
@@ -65,7 +69,7 @@ void runTest(std::string workloadDir, std::string oracleDir, std::string reportD
 		return;
 	}
 	
-	status = runChecker(workloadFile, reportFile);
+	status = runChecker(oracleFile, reportFile);
 	if (status < 0) {
 		std::cout << "Checker failed!" << std::endl;
 		return;
@@ -106,7 +110,7 @@ int runCrasher(const char* workloadFile) {
 		exit(EXIT_FAILURE);
 	}
 
-	int status
+	int status;
 	pid_t wpid = waitpid(cpid, &status, 0);
 	if (wpid == -1) {
 		perror("Failed to wait on crasher");
@@ -115,7 +119,7 @@ int runCrasher(const char* workloadFile) {
 	return status;
 }
 
-int runChecker(const char* workloadFile, const char* reportFile) {
+int runChecker(const char* oracleFile, const char* reportFile) {
 	pid_t cpid = fork();
 	if (cpid == -1) {
 		perror("Failed to fork checker");
