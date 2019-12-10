@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
 
 	std::cout << "\nTESTS PASSED: " << pass << std::endl;
 	std::cout << "TESTS FAILED: " << fail << std::endl;
-    closedir(dp);
+        // closedir(dp);
 }
 
 int runTest(std::string workloadDir, std::string workloadName) {
@@ -265,7 +265,7 @@ int startStrataIfNeeded(void) {
 		// 	dup2(output_fd, STDOUT_FILENO);
 		// 	dup2(output_fd, STDERR_FILENO);
 		// }
-		execl("bash", RUN_STRATA_SCRIPT_PATH, NULL);
+		execl(RUN_STRATA_SCRIPT_PATH, NULL);
 		perror("Failed to exec strata");
 		exit(EXIT_FAILURE);
 	} 
