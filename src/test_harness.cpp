@@ -275,6 +275,7 @@ int startStrataIfNeeded(void) {
 		return 0;
 	}
 
+	std::cout << "\tStarting Strata" << std::endl;
 	pid_t cpid = fork();
 	if (cpid == -1) {
 		perror("Failed to fork strata");
