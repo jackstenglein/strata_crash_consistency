@@ -40,6 +40,9 @@ int main(int argc, char** argv) {
 
 	std::string workloadDir(argv[WORKLOAD_DIR_INDEX]);
 
+	int pass = 0;
+	int fail = 0;
+
 	// Read all files in workload directory
 	int err;
 	struct dirent *entry = nullptr;
@@ -51,13 +54,16 @@ int main(int argc, char** argv) {
 			if (workloadName != "." && workloadName != "..") {
 				err = runTest(workloadDir, workloadName);
 				if (err) {
-					std::cout << "Aborting remaining tests" << std::endl;
-					return -1;
+					fail++;
+				} else {
+					pass++;
 				}
 			}
 		}
     }
 
+	std::cout << "TESTS PASSED: " << pass << std::endl;
+	std::cout << "TESTS FAILED: " << fail << std::endl;
     closedir(dp);
 }
 
