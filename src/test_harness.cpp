@@ -49,43 +49,38 @@ int main(int argc, char** argv) {
 	int pass = 0;
 	int fail = 0;
 
-	int result = startStrataIfNeeded();
-	if (result < 0) {
-		std::cout << "Failed to start Strata" << std::endl;
-	}
-
 	// Read all files in workload directory
-	// int err;
-	// struct dirent *entry = nullptr;
-    // DIR *dp = nullptr;
-    // dp = opendir(workloadDir.c_str());
-    // if (dp != nullptr) {
-    //     while ((entry = readdir(dp))) {
-	// 		std::string workloadName(entry->d_name);
-	// 		if (workloadName != "." && workloadName != "..") {
-	// 			err = runTest(workloadDir, workloadName);
-	// 			if (err) {
-	// 				fail++;
-	// 				std::cout << "Test FAILED\n";
-	// 			} else {
-	// 				pass++;
-	// 				std::cout << "Test PASSED\n";
-	// 			}
-	// 		}
-	// 	}
-    // }
+	int err;
+	struct dirent *entry = nullptr;
+    DIR *dp = nullptr;
+    dp = opendir(workloadDir.c_str());
+    if (dp != nullptr) {
+        while ((entry = readdir(dp))) {
+			std::string workloadName(entry->d_name);
+			if (workloadName != "." && workloadName != "..") {
+				err = runTest(workloadDir, workloadName);
+				if (err) {
+					fail++;
+					std::cout << "Test FAILED\n";
+				} else {
+					pass++;
+					std::cout << "Test PASSED\n";
+				}
+			}
+		}
+    }
 
 	std::cout << "\nTESTS PASSED: " << pass << std::endl;
 	std::cout << "TESTS FAILED: " << fail << std::endl;
-        // closedir(dp);
+	closedir(dp);
 }
 
 int runTest(std::string workloadDir, std::string workloadName) {
 	std::cout << "\nTesting " << workloadName << std::endl;
 
 	std::string separator("/");
-	std::string oracleDir = ("/mlfs/oracle-" + workloadName + "-nocrash3");
-	std::string crashDir = ("/mlfs/crash-" + workloadName + "-nocrash3");
+	std::string oracleDir = ("/mlfs/oracle-" + workloadName + "-crash");
+	std::string crashDir = ("/mlfs/crash-" + workloadName + "-crash");
 	std::string workloadFile = (workloadDir + separator + workloadName);
 	std::string oracleFile = ("oracle/" + workloadName);
 	std::string reportFile = ("report/" + workloadName);
@@ -111,7 +106,7 @@ int runTest(std::string workloadDir, std::string workloadName) {
 		return -1;
 	}
 	
-	status = runChecker(oracleDir, crashDir, reportFile, checkOutput);
+	status = runChecker(oracleFile, crashDir, reportFile, checkOutput);
 	if (status != 0) {
 		std::cout << "Checker failed!" << std::endl;
 		return -1;
@@ -122,20 +117,26 @@ int runTest(std::string workloadDir, std::string workloadName) {
 
 int createTestDirectories(std::string oracleDir, std::string crashDir) {
 
+	int err = startStrataIfNeeded();
+	if (err) {
+		std::cout << "Failed to start Strata" << std::endl;
+		return err;
+	}
+
 #ifdef MLFS
 	init_fs();
 #endif
 
 	std::cout << "\tMaking oracle directory: " << oracleDir << std::endl;
-	int err = mkdir(oracleDir.c_str(), 0777);
-	if (err != 0) {
+	err = mkdir(oracleDir.c_str(), 0777);
+	if (err) {
 		perror("Failed to make oracleDir");
 		return err;
 	}
 
 	std::cout << "\tMaking crash directory: " << crashDir << std::endl;
 	err = mkdir(crashDir.c_str(), 0777);
-	if (err != 0) {
+	if (err) {
 		perror("Failed to make crashDir");
 		return err;
 	}
@@ -149,6 +150,13 @@ int createTestDirectories(std::string oracleDir, std::string crashDir) {
 
 int runOracle(std::string oracleDir, std::string workloadFile, std::string oracleFile, std::string outputFile) {
 	std::cout << "\tRunning oracle in directory " << oracleDir << " with workload " << workloadFile << " and oracleFile: " << oracleFile << std::endl;
+	
+	int err = startStrataIfNeeded();
+	if (err) {
+		std::cout << "Failed to start Strata" << std::endl;
+		return err;
+	}
+	
 	pid_t cpid = fork();
 	if (cpid == -1) {
 		perror("Failed to fork oracle");
@@ -180,6 +188,13 @@ int runOracle(std::string oracleDir, std::string workloadFile, std::string oracl
 
 int runCrasher(std::string crashDir, std::string workloadFile, std::string outputFile) {
 	std::cout << "\tRunning crasher in directory " << crashDir << " with workload " << workloadFile << std::endl;
+	
+	int err = startStrataIfNeeded();
+	if (err) {
+		std::cout << "Failed to start Strata" << std::endl;
+		return err;
+	}
+
 	pid_t cpid = fork();
 	if (cpid == -1) {
 		perror("Failed to fork crasher");
@@ -190,7 +205,7 @@ int runCrasher(std::string crashDir, std::string workloadFile, std::string outpu
 		if (output_fd >= 0) {
 			dup2(output_fd, STDOUT_FILENO);
 		}
-		execl(CRASH_EXE_PATH, "strata_read_ace_workload", workloadFile.c_str(), crashDir.c_str(), "oracle", "oracle/scratch", NULL);
+		execl(CRASH_EXE_PATH, "strata_read_ace_workload", workloadFile.c_str(), crashDir.c_str(), "crash", "true", NULL);
 		perror("Failed to exec crasher");
 		exit(EXIT_FAILURE);
 	}
@@ -209,6 +224,13 @@ int runCrasher(std::string crashDir, std::string workloadFile, std::string outpu
 
 int runChecker(std::string oracleFile, std::string crashDir, std::string reportFile, std::string outputFile) {
 	std::cout << "\tRunning checker in directory " << crashDir << " with oracleFile " << oracleFile << " and reportFile " << reportFile << std::endl;
+	
+	int err = startStrataIfNeeded();
+	if (err) {
+		std::cout << "Failed to start Strata" << std::endl;
+		return err;
+	}
+
 	pid_t cpid = fork();
 	if (cpid == -1) {
 		perror("Failed to fork checker");
@@ -260,11 +282,11 @@ int startStrataIfNeeded(void) {
 	}
 	if (cpid == 0) {
 		// Child process
-		// int output_fd = open(outputFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
-		// if (output_fd >= 0) {
-		// 	dup2(output_fd, STDOUT_FILENO);
-		// 	dup2(output_fd, STDERR_FILENO);
-		// }
+		int output_fd = open("output/kernfs", O_WRONLY | O_CREAT | O_TRUNC);
+		if (output_fd >= 0) {
+			dup2(output_fd, STDOUT_FILENO);
+			dup2(output_fd, STDERR_FILENO);
+		}
 		execl(RUN_STRATA_SCRIPT_PATH, NULL);
 		perror("Failed to exec strata");
 		exit(EXIT_FAILURE);
