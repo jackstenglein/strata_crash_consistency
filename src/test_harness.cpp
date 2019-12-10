@@ -75,8 +75,8 @@ int runTest(std::string workloadDir, std::string workloadName) {
 	std::cout << "\nTesting " << workloadName << std::endl;
 
 	std::string separator("/");
-	std::string oracleDir = ("/mlfs/oracle-" + workloadName + "-nocrash");
-	std::string crashDir = ("/mlfs/crash-" + workloadName + "-nocrash");
+	std::string oracleDir = ("/mlfs/oracle-" + workloadName + "-nocrash3");
+	std::string crashDir = ("/mlfs/crash-" + workloadName + "-nocrash3");
 	std::string workloadFile = (workloadDir + separator + workloadName);
 	std::string oracleFile = ("oracle/" + workloadName);
 	std::string reportFile = ("report/" + workloadName);
@@ -150,6 +150,7 @@ int runOracle(std::string oracleDir, std::string workloadFile, std::string oracl
 		int output_fd = open(outputFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
 		if (output_fd >= 0) {
 			dup2(output_fd, STDOUT_FILENO);
+			dup2(output_fd, STDERR_FILENO);
 		}
 		execl(ORACLE_EXE_PATH, "strata_read_ace_workload", workloadFile.c_str(), oracleDir.c_str(), "oracle", oracleFile.c_str(), NULL);
 		perror("Failed to exec oracle");

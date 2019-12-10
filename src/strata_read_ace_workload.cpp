@@ -106,7 +106,8 @@ int runWorkload(std::string workloadFile, AbstractAceRunner* runner) {
         result = runner->handle_action(tokens);
         if (result < 0) {
             std::cout << "FAILED workload on line: " << line << std::endl;
-            perror("");
+	    std::cout << "Return value: " << result << std::endl;
+	    perror("");
             return -1;
         }
     }

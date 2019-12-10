@@ -123,6 +123,7 @@ int AbstractAceRunner::handle_mkdir(std::vector<std::string>& tokens) {
     const int perm_index = 2;
     std::string c_dir_name = getFilePath(tokens[dir_index]);
     int permissions = std::stoi(tokens[perm_index], nullptr, 10);
+    std::cout << "mkdir: " << c_dir_name << " with permissions: " << permissions << std::endl;
     return mkdir(c_dir_name.c_str(), (mode_t)permissions);
 }
 
