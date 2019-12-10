@@ -17,6 +17,8 @@
 #define CRASH_EXE_PATH "build/strata_read_ace_workload"
 #define CHECKER_EXE_PATH "build/oracle_checker"
 
+#define RUN_STRATA_SCRIPT_PATH "./run_strata.sh"
+
 #define WORKLOAD_DIR_INDEX 1
 #define ORACLE_DIR_INDEX 2
 #define REPORT_DIR_INDEX 3
@@ -26,6 +28,8 @@ int createTestDirectories(std::string, std::string);
 int runOracle(std::string, std::string, std::string, std::string);
 int runCrasher(std::string, std::string, std::string);
 int runChecker(std::string, std::string, std::string, std::string);
+pid_t getStrataPid(void);
+int startStrataIfNeeded(void);
 
 /*
 	Usage: ./test_harness WORKLOAD_DIR
@@ -45,26 +49,31 @@ int main(int argc, char** argv) {
 	int pass = 0;
 	int fail = 0;
 
+	int result = startStrataIfNeeded();
+	if (result < 0) {
+		std::cout << "Failed to start Strata" << std::endl;
+	}
+
 	// Read all files in workload directory
-	int err;
-	struct dirent *entry = nullptr;
-    DIR *dp = nullptr;
-    dp = opendir(workloadDir.c_str());
-    if (dp != nullptr) {
-        while ((entry = readdir(dp))) {
-			std::string workloadName(entry->d_name);
-			if (workloadName != "." && workloadName != "..") {
-				err = runTest(workloadDir, workloadName);
-				if (err) {
-					fail++;
-					std::cout << "Test FAILED\n";
-				} else {
-					pass++;
-					std::cout << "Test PASSED\n";
-				}
-			}
-		}
-    }
+	// int err;
+	// struct dirent *entry = nullptr;
+    // DIR *dp = nullptr;
+    // dp = opendir(workloadDir.c_str());
+    // if (dp != nullptr) {
+    //     while ((entry = readdir(dp))) {
+	// 		std::string workloadName(entry->d_name);
+	// 		if (workloadName != "." && workloadName != "..") {
+	// 			err = runTest(workloadDir, workloadName);
+	// 			if (err) {
+	// 				fail++;
+	// 				std::cout << "Test FAILED\n";
+	// 			} else {
+	// 				pass++;
+	// 				std::cout << "Test PASSED\n";
+	// 			}
+	// 		}
+	// 	}
+    // }
 
 	std::cout << "\nTESTS PASSED: " << pass << std::endl;
 	std::cout << "TESTS FAILED: " << fail << std::endl;
@@ -225,4 +234,47 @@ int runChecker(std::string oracleFile, std::string crashDir, std::string reportF
 
 	std::cout << "\tFinished waiting on checker; got status " << WEXITSTATUS(status) << std::endl;
 	return WEXITSTATUS(status);
+}
+
+// Gets strata's pid to determine if it is alive
+pid_t getStrataPid(void) {
+    char buf[512];
+    FILE *cmd_pipe = popen("pidof -s kernfs", "r");
+    fgets(buf, 512, cmd_pipe);
+    pid_t pid = strtoul(buf, NULL, 10);
+    pclose(cmd_pipe);  
+    return pid;
+}
+
+int startStrataIfNeeded(void) {
+	pid_t spid = getStrataPid();
+	if (spid > 0) {
+		// Strata is already running
+		return 0;
+	}
+
+	pid_t cpid = fork();
+	if (cpid == -1) {
+		perror("Failed to fork strata");
+		return -1;
+	}
+	if (cpid == 0) {
+		// Child process
+		// int output_fd = open(outputFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
+		// if (output_fd >= 0) {
+		// 	dup2(output_fd, STDOUT_FILENO);
+		// 	dup2(output_fd, STDERR_FILENO);
+		// }
+		execl("bash", RUN_STRATA_SCRIPT_PATH, NULL);
+		perror("Failed to exec strata");
+		exit(EXIT_FAILURE);
+	} 
+
+	// Sleep for 2 seconds to ensure Strata has time to start/digest logs
+	sleep(2);
+
+	// Check that it is running now
+	spid = getStrataPid();
+	if (spid <= 0) return -1;
+	return 0;
 }
