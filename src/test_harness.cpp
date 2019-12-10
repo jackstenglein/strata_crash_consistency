@@ -188,7 +188,7 @@ int runCrasher(std::string crashDir, std::string workloadFile, std::string outpu
 
 	std::cout << "\tWaiting on crasher" << std::endl;
 	int status = 0;
-	pid_t wpid = wait(NULL);
+	pid_t wpid = waitpid(cpid, &status, 0);
 	if (wpid == -1) {
 		perror("Failed to wait on crasher");
 		return -1;
