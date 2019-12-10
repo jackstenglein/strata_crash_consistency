@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
 #endif
 
     int result;
-    FSSnapshot oracleSnapshot(oracleFile);
+    FSSnapshot oracleSnapshot(oracleFile, getAllFilePaths(oracleFile));
     FSSnapshot currentSnapshot(fsDir, getAllFilePaths(fsDir));
     if (oracleSnapshot == currentSnapshot) {
         std::cout << "TEST PASSED" << std::endl;
