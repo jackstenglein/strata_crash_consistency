@@ -17,7 +17,7 @@ int main() {
 		init_fs();
 	#endif
 
-	mkdir("/mlfs/test4", 0777);
+	mkdir("/mlfs/test5", 0777);
 	
 
 #ifdef MLFS

@@ -16,27 +16,37 @@ int main() {
 	#ifdef MLFS
 		init_fs();
 	#endif
-	mkdir("/mlfs/test", 0777);
-	int fd = open("/mlfs/test/foo", O_RDWR|O_CREAT, 0777);
+	int fd = open("/mlfs/test5/oof", O_RDWR|O_CREAT, 0777);
 	if (fd < 0) {
 		perror("Failed to open");
 	}
 	fsync(fd);
 	close(fd);
 	struct stat result;
-	stat("/mlfs/test/foo", &result);
-	std::cout << "Stats before digestion: " << std::endl;
+	stat("/mlfs/test5/oof", &result);
+	std::cout << "Stats before remove: " << std::endl;
+	printStats(&result);
+
+	int err = remove("/mlfs/test5/oof");
+	if (err != 0) {
+		perror("remove");
+	}
+
+	stat("/mlfs/test5/oof", &result);
+	std::cout << "Stats after remove: " << std::endl;
+
+	fd = open("/mlfs/test5/oof", O_RDWR|O_CREAT, 0777);
+	if (fd < 0) {
+		perror("open");
+	}
+
+	stat("/mlfs/test5/oof", &result);
+	std::cout << "Stats after recreation: " << std::endl;
 	printStats(&result);
 
 #ifdef MLFS
 	shutdown_fs();
-	init_fs();
 #endif
-
-	stat("/mlfs/test/foo", &result);
-	std::cout << "Stats after digestion: " << std::endl;
-	printStats(&result);
-
 	return 0;
 }
 
